@@ -38,9 +38,9 @@ public class Board extends Character {
     @Override
     public void init() {
         super.init();
-        setDimensions(scene.getWidth(), scene.getWidth());
-        setPosition(scene.getX(), scene.getY() + (scene.getHeight() - height) / 2);
 
+        this.setDimension(scene.getMagnetonGame().getDimension());
+        
         for(Piece p: lstPieces){
             p.init();
         }

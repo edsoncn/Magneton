@@ -13,6 +13,13 @@ public class MagnetonGame extends GameThread {
 
     public static final int STATE_LEVELS = 6;
 
+    public static final int DIMENSION_6x6 = 6;
+    public static final int DIMENSION_8x8 = 8;
+
+    public static final int LEVEL_EASY = 1;
+    public static final int LEVEL_MEDIUM = 2;
+    public static final int LEVEL_HARD = 3;
+
     private PlayScene playScene;
     private SelectScene selectScene;
     private LevelsScene levelsScene;
@@ -20,9 +27,12 @@ public class MagnetonGame extends GameThread {
     private int stateGame;
     private int stateToChange;
     private int dimension;
+    private int level;
 
     public MagnetonGame(GameView gameView) {
         super(gameView);
+        setDimension(DIMENSION_8x8);
+        setLevel(LEVEL_EASY);
     }
 
     private void setStateGame(int state){
@@ -72,7 +82,16 @@ public class MagnetonGame extends GameThread {
     protected void updateGame(float secondsElapsed) {
         if(stateToChange != stateGame){
 
-            //Do things for the new state
+            switch (stateGame){
+                case STATE_READY:
+                    switch (stateToChange){
+                        case STATE_RUNNING:
+                            playScene.getBoard().init();
+                            playScene.getBoard().resize();
+                            break;
+                    }
+                    break;
+            }
 
             setStateGame(stateToChange);
         }
@@ -111,5 +130,13 @@ public class MagnetonGame extends GameThread {
 
     public void setDimension(int dimension) {
         this.dimension = dimension;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
     }
 }

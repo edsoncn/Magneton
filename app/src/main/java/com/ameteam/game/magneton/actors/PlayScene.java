@@ -15,7 +15,7 @@ public class PlayScene extends Scene {
 
     public PlayScene(MagnetonGame magnetonGame){
         super(magnetonGame);
-        board = new Board(this, 8);
+        board = new Board(this, MagnetonGame.DIMENSION_8x8);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class PlayScene extends Scene {
 
     @Override
     public void resize(int width, int height) {
-        float p = 0.96f; //proporcion
+        float p = 0.96f; //proportion
         float r = 16.0f / 10.0f; //ratio
 
         setDimensions(width * p, width * p * r);
@@ -65,5 +65,7 @@ public class PlayScene extends Scene {
         board.resize();
     }
 
-
+    public Board getBoard() {
+        return board;
+    }
 }

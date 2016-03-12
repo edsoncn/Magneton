@@ -48,11 +48,11 @@ public class SelectScene extends Scene {
     public void actionOnTouch(float x, float y) {
         Log.i("SelectScene", "Touch: x=" + x + ", y=" + y);
         if(button6x6.validateTouch(x, y)){
-            getMagnetonGame().setDimension(6);
+            getMagnetonGame().setDimension(MagnetonGame.DIMENSION_6x6);
             getMagnetonGame().changeState(MagnetonGame.STATE_RUNNING);
         }else if(button8x8.validateTouch(x, y)){
-            getMagnetonGame().setDimension(8);
-            getMagnetonGame().changeState(MagnetonGame.STATE_LEVELS);
+            getMagnetonGame().setDimension(MagnetonGame.DIMENSION_8x8);
+            getMagnetonGame().changeState(MagnetonGame.STATE_RUNNING);
         }
     }
 
