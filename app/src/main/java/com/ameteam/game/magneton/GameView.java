@@ -8,6 +8,7 @@ import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -19,35 +20,13 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
 	private SensorEventListener sensorAccelerometer;
 
-	//Handle communication from the GameThread to the View/Activity Thread
-	private Handler mHandler;
-	
-	//Pointers to the views
-	private TextView mScoreView;
-	private TextView mStatusView;
-
-
 	public GameView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
 		//Get the holder of the screen and register interest
 		SurfaceHolder holder = getHolder();
 		holder.addCallback(this);
-		
-		//Set up a handler for messages from GameThread
-		mHandler = new Handler() {
-			@Override
-			public void handleMessage(Message m) {
-				if(m.getData().getBoolean("score")) {
-					mScoreView.setText(m.getData().getString("text"));
-				}
-				else {
-					//So it is a status
-					mStatusView.setVisibility(m.getData().getInt("viz"));
-					mStatusView.setText(m.getData().getString("text"));
-				}
- 			}
-		};
+
 	}
 	
 	//Used to release any resources.
@@ -106,32 +85,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	public GameThread getThread() {
 		return thread;
 	}
-
-	public TextView getStatusView() {
-		return mStatusView;
-	}
-
-	public void setStatusView(TextView mStatusView) {
-		this.mStatusView = mStatusView;
-	}
-	
-	public TextView getScoreView() {
-		return mScoreView;
-	}
-
-	public void setScoreView(TextView mScoreView) {
-		this.mScoreView = mScoreView;
-	}
-	
-
-	public Handler getmHandler() {
-		return mHandler;
-	}
-
-	public void setmHandler(Handler mHandler) {
-		this.mHandler = mHandler;
-	}
-	
 	
 	/*
 	 * Screen functions
@@ -147,11 +100,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	public void surfaceCreated(SurfaceHolder holder) {
+		Log.i("GameView", "surfaceCreated");
 		if(thread!=null) {
+			Log.i("GameView", "surfaceCreated: thread != null");
 			thread.setRunning(true);
-			
+
+			Log.i("GameView", "surfaceCreated: state="+thread.getState());
 			if(thread.getState() == Thread.State.NEW){
+				Log.i("GameView", "surfaceCreated: state new");
 				//Just start the new thread
+				thread.doStart();
 				thread.start();
 			}
 			else {
@@ -161,6 +119,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 					//The method should set all fields in new thread to the value of old thread's fields 
 					thread = new MagnetonGame(this);
 					thread.setRunning(true);
+					thread.doStart();
 					thread.start();
 				}
 			}

@@ -4,6 +4,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import com.ameteam.game.magneton.MagnetonGame;
+
 /**
  * Created by edson on 5/03/2016.
  */
@@ -11,20 +13,14 @@ public class PlayScene extends Scene {
 
     private Board board;
 
-    public PlayScene(Stage stage){
-        super(stage);
-        board = new Board(this,8);
+    public PlayScene(MagnetonGame magnetonGame){
+        super(magnetonGame);
+        board = new Board(this, 8);
     }
 
     @Override
     public void init() {
         super.init();
-
-        float p = 0.96f; //proporcion
-        float r = 16.0f / 10.0f; //ratio
-
-        setDimensions(getStage().getWidth() * p, getStage().getWidth() * p * r);
-        setPosition((getStage().getWidth() - width) / 2, (getStage().getHeight() - height) / 2);
 
         board.init();
     }
@@ -36,7 +32,7 @@ public class PlayScene extends Scene {
         //Background
         Paint paint = new Paint();
         paint.setColor(Color.parseColor("#000000"));
-        canvas.drawRect(0, 0, stage.getWidth(), stage.getHeight(), paint);
+        canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), paint);
 
         //Scene
         Paint paintScene = new Paint();
@@ -46,6 +42,26 @@ public class PlayScene extends Scene {
 
         //Board
         board.doDraw(canvas);
+    }
+
+    @Override
+    public void update(float secondsElapsed) {
+
+    }
+
+    @Override
+    public void actionOnTouch(float x, float y) {
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        float p = 0.96f; //proporcion
+        float r = 16.0f / 10.0f; //ratio
+
+        setDimensions(width * p, width * p * r);
+        setPosition((width - this.width) / 2, (height - this.height) / 2);
+
+        board.resize();
     }
 
 

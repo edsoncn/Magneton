@@ -26,8 +26,6 @@ public class Piece extends Character{
     @Override
     public void init() {
         super.init();
-        setDimensions((float) (board.getWidth()/board.getDimension()*0.9), (float) (board.getHeight()/board.getDimension()*0.9));
-        setPosition(this.board.getX()+getPositionX()*board.getWidth()/board.getDimension(),this.board.getY()+getPositionY()*board.getHeight()/board.getDimension());
     }
 
     @Override
@@ -39,8 +37,23 @@ public class Piece extends Character{
         }else if(this.getType() == BLUE){
             paint.setColor(Color.parseColor("#448aff"));
         }
-        rect.set((float)(x+getWidth()*0.1), (float)(y+getHeight()*0.1), x + getWidth(), y + getHeight());
+        rect.set((float) (x + getWidth() * 0.1), (float) (y + getHeight() * 0.1), x + getWidth(), y + getHeight());
         canvas.drawOval(rect, paint);
+    }
+
+    @Override
+    public void resize() {
+        setDimensions((float) (board.getWidth() / board.getDimension() * 0.9), (float) (board.getHeight() / board.getDimension() * 0.9));
+        setPosition(this.board.getX()+getPositionX()*board.getWidth()/board.getDimension(),this.board.getY()+getPositionY()*board.getHeight()/board.getDimension());
+    }
+    @Override
+    public void update(float secondsElapsed) {
+
+    }
+
+    @Override
+    public void actionOnTouch(float x, float y) {
+
     }
 
     public int getType() {
@@ -74,4 +87,5 @@ public class Piece extends Character{
     public void setPositionY(int positionY) {
         this.positionY = positionY;
     }
+
 }

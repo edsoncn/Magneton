@@ -58,4 +58,22 @@ public class Board extends Character {
     public void setDimension(int dimension) {
         this.dimension = dimension;
     }
+
+    @Override
+    public void resize() {
+        setDimensions(scene.getWidth(), scene.getWidth());
+        setPosition(scene.getX(), scene.getY() + (scene.getHeight() - height) / 2);
+
+        piece.resize();
+    }
+
+    @Override
+    public void update(float secondsElapsed) {
+    }
+
+    @Override
+    public void actionOnTouch(float x, float y) {
+
+    }
+
 }

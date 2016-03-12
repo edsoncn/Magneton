@@ -19,4 +19,7 @@ public abstract class Character extends Actor{
     public void setScene(Scene scene) {
         this.scene = scene;
     }
+
+    public abstract void resize();
+
 }

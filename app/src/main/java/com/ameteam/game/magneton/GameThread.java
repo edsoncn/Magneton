@@ -32,10 +32,7 @@ public abstract class GameThread extends Thread {
 		
 	//The surface this thread (and only this thread) writes upon
 	private SurfaceHolder mSurfaceHolder;
-	
-	//the message handler to the View/Activity thread
-	private Handler mHandler;
-	
+
 	//Android Context - this stores almost all we need to know
 	private Context mContext;
 	
@@ -61,7 +58,6 @@ public abstract class GameThread extends Thread {
 		mGameView = gameView;
 		
 		mSurfaceHolder = gameView.getHolder();
-		mHandler = gameView.getmHandler();
 		mContext = gameView.getContext();
 		
 		mBackgroundImage = BitmapFactory.decodeResource
@@ -77,7 +73,6 @@ public abstract class GameThread extends Thread {
 	public void cleanup() {		
 		this.mContext = null;
 		this.mGameView = null;
-		this.mHandler = null;
 		this.mSurfaceHolder = null;
 	}
 	
@@ -92,8 +87,6 @@ public abstract class GameThread extends Thread {
 			
 			mLastTime = System.currentTimeMillis() + 100;
 
-			setState(STATE_RUNNING);
-			
 			setScore(0);
 		}
 	}
@@ -107,7 +100,7 @@ public abstract class GameThread extends Thread {
 			try {
 				canvasRun = mSurfaceHolder.lockCanvas(null);
 				synchronized (mSurfaceHolder) {
-					if (mMode == STATE_RUNNING) {
+					if (mMode == STATE_RUNNING || mMode == STATE_READY) {
 						updatePhysics();
 					}
 					doDraw(canvasRun);
@@ -130,11 +123,13 @@ public abstract class GameThread extends Thread {
 			mCanvasWidth = width;
 			mCanvasHeight = height;
 
+			resize(width, height);
 			// don't forget to resize the background image
 			//mBackgroundImage = Bitmap.createScaledBitmap(mBackgroundImage, width, height, true);
 		}
 	}
 
+	public abstract void resize(int width, int height);
 
 	protected void doDraw(Canvas canvas) {
 		
@@ -162,17 +157,7 @@ public abstract class GameThread extends Thread {
 	//Finger touches the screen
 	public boolean onTouch(MotionEvent e) {
 		if(e.getAction() != MotionEvent.ACTION_DOWN) return false;
-		
-		if(mMode == STATE_READY || mMode == STATE_LOSE || mMode == STATE_WIN) {
-			doStart();
-			return true;
-		}
-		
-		if(mMode == STATE_PAUSE) {
-			unpause();
-			return true;
-		}
-		
+
 		synchronized (mSurfaceHolder) {
 				this.actionOnTouch(e.getRawX(), e.getRawY());
 		}
@@ -225,44 +210,17 @@ public abstract class GameThread extends Thread {
 	public void setState(int mode, CharSequence message) {
 		synchronized (mSurfaceHolder) {
 			mMode = mode;
-
-			if (mMode == STATE_RUNNING) {
-				Message msg = mHandler.obtainMessage();
-				Bundle b = new Bundle();
-				b.putString("text", "");
-				b.putInt("viz", View.INVISIBLE);
-				b.putBoolean("showAd", false);	
-				msg.setData(b);
-				mHandler.sendMessage(msg);
-			} 
-			else {				
-				Message msg = mHandler.obtainMessage();
-				Bundle b = new Bundle();
-				
-				Resources res = mContext.getResources();
-				CharSequence str = "";
-				if (mMode == STATE_READY)
-					str = res.getText(R.string.mode_ready);
-				else 
-					if (mMode == STATE_PAUSE)
-						str = res.getText(R.string.mode_pause);
-					else 
-						if (mMode == STATE_LOSE)
-							str = res.getText(R.string.mode_lose);
-						else 
-							if (mMode == STATE_WIN) {
-								str = res.getText(R.string.mode_win);
-							}
-
-				if (message != null) {
-					str = message + "\n" + str;
-				}
-
-				b.putString("text", str.toString());
-				b.putInt("viz", View.VISIBLE);
-
-				msg.setData(b);
-				mHandler.sendMessage(msg);
+			switch (mMode){
+				case STATE_RUNNING:
+					break;
+				case STATE_READY:
+					break;
+				case STATE_PAUSE:
+					break;
+				case STATE_LOSE:
+					break;
+				case STATE_WIN:
+					break;
 			}
 		}
 	}
@@ -299,12 +257,7 @@ public abstract class GameThread extends Thread {
 		this.score = score;
 		
 		synchronized (mSurfaceHolder) {
-			Message msg = mHandler.obtainMessage();
-			Bundle b = new Bundle();
-			b.putBoolean("score", true);
-			b.putString("text", getScoreString().toString());
-			msg.setData(b);
-			mHandler.sendMessage(msg);
+			//TODO
 		}
 	}
 

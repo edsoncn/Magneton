@@ -31,6 +31,10 @@ public abstract class Actor {
 
     public abstract void doDraw(Canvas canvas);
 
+    public abstract void update(float secondsElapsed);
+
+    public abstract void actionOnTouch(float x, float y);
+
     public void setDimensions(float width, float height){
         this.width = width;
         this.height = height;

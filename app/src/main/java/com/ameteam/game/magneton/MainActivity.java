@@ -29,8 +29,6 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         mGameView = (GameView)findViewById(R.id.gamearea);
-        mGameView.setStatusView((TextView)findViewById(R.id.text));
-        mGameView.setScoreView((TextView)findViewById(R.id.score));
 
         this.startGame(mGameView, null, savedInstanceState);
     }
@@ -68,41 +66,6 @@ public class MainActivity extends ActionBarActivity {
         mGameView = null;
     }
 
-    /*
-     * UI Functions
-     */
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-
-        menu.add(0, MENU_START, 0, R.string.menu_start);
-        menu.add(0, MENU_STOP, 0, R.string.menu_stop);
-        menu.add(0, MENU_RESUME, 0, R.string.menu_resume);
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case MENU_START:
-                mGameThread.doStart();
-                return true;
-            case MENU_STOP:
-                mGameThread.setState(GameThread.STATE_LOSE,  getText(R.string.message_stopped));
-                return true;
-            case MENU_RESUME:
-                mGameThread.unpause();
-                return true;
-        }
-
-        return false;
-    }
-
-    public void onNothingSelected(AdapterView<?> arg0) {
-        // Do nothing if nothing is selected
-    }
 }
 
 // This file is part of the course "Begin Programming: Build your first mobile game" from futurelearn.com
