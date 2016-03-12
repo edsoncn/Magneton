@@ -3,6 +3,10 @@ package com.ameteam.game.magneton.actors;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by edson on 3/03/2016.
@@ -10,15 +14,25 @@ import android.graphics.Paint;
 public class Board extends Character {
 
     private int dimension;
-    private Piece piece;
+    private List<Piece> lstPieces;
 
     public Board(Scene scene, int dimension) {
         super(scene);
         this.dimension = dimension;
-        piece = new Piece(scene,this);
+
+        lstPieces = new ArrayList<>();
+
+        Piece piece = new Piece(scene,this);
         piece.setType(1);
         piece.setPositionX(1);
         piece.setPositionY(3);
+        lstPieces.add(piece);
+
+        /*Piece piece2 = new Piece(scene,this);
+        piece2.setType(2);
+        piece2.setPositionX(3);
+        piece2.setPositionY(4);
+        lstPieces.add(piece2);*/
     }
 
     @Override
@@ -27,7 +41,9 @@ public class Board extends Character {
         setDimensions(scene.getWidth(), scene.getWidth());
         setPosition(scene.getX(), scene.getY() + (scene.getHeight() - height) / 2);
 
-        piece.init();
+        for(Piece p: lstPieces){
+            p.init();
+        }
     }
 
     @Override
@@ -48,7 +64,9 @@ public class Board extends Character {
                 }
             }
         }
-        piece.doDraw(canvas);
+        for(Piece p: lstPieces){
+            p.doDraw(canvas);
+        }
     }
 
     public int getDimension() {
@@ -64,7 +82,9 @@ public class Board extends Character {
         setDimensions(scene.getWidth(), scene.getWidth());
         setPosition(scene.getX(), scene.getY() + (scene.getHeight() - height) / 2);
 
-        piece.resize();
+        for(Piece p: lstPieces){
+            p.resize();
+        }
     }
 
     @Override
@@ -73,7 +93,20 @@ public class Board extends Character {
 
     @Override
     public void actionOnTouch(float x, float y) {
+        if(y>this.y && y<this.y+getHeight()){
+            int posX= (int) ((x-this.x)/(getWidth()/getDimension()));
+            int posY= (int) ((y-this.y)/(getHeight()/getDimension()));
 
+            Piece piece = new Piece(scene,this);
+            piece.setPositionX(posX);
+            piece.setPositionY(posY);
+            if(!lstPieces.contains(piece)) {
+                piece.setType(lstPieces.size() % 2 == 0 ? 2 : 1);
+                piece.init();
+                piece.resize();
+                lstPieces.add(piece);
+            }
+        }
     }
 
 }

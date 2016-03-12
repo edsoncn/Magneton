@@ -46,6 +46,7 @@ public class Piece extends Character{
         setDimensions((float) (board.getWidth() / board.getDimension() * 0.9), (float) (board.getHeight() / board.getDimension() * 0.9));
         setPosition(this.board.getX()+getPositionX()*board.getWidth()/board.getDimension(),this.board.getY()+getPositionY()*board.getHeight()/board.getDimension());
     }
+
     @Override
     public void update(float secondsElapsed) {
 
@@ -54,6 +55,16 @@ public class Piece extends Character{
     @Override
     public void actionOnTouch(float x, float y) {
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(o instanceof Piece){
+            Piece p = (Piece)o;
+            return this.getPositionX() == p.getPositionX()
+                    && this.getPositionY() == p.getPositionY();
+        }
+        return false;
     }
 
     public int getType() {

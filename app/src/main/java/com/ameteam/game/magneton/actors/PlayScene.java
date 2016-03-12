@@ -51,6 +51,7 @@ public class PlayScene extends Scene {
 
     @Override
     public void actionOnTouch(float x, float y) {
+        board.actionOnTouch(x, y);
     }
 
     @Override
