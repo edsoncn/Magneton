@@ -13,7 +13,7 @@ public class PlayScene extends Scene {
 
     public PlayScene(Stage stage){
         super(stage);
-        board = new Board(this);
+        board = new Board(this,8);
     }
 
     @Override

@@ -9,8 +9,16 @@ import android.graphics.Paint;
  */
 public class Board extends Character {
 
-    public Board(Scene scene) {
+    private int dimension;
+    private Piece piece;
+
+    public Board(Scene scene, int dimension) {
         super(scene);
+        this.dimension = dimension;
+        piece = new Piece(scene,this);
+        piece.setType(1);
+        piece.setPositionX(1);
+        piece.setPositionY(3);
     }
 
     @Override
@@ -18,6 +26,8 @@ public class Board extends Character {
         super.init();
         setDimensions(scene.getWidth(), scene.getWidth());
         setPosition(scene.getX(), scene.getY() + (scene.getHeight() - height) / 2);
+
+        piece.init();
     }
 
     @Override
@@ -28,7 +38,7 @@ public class Board extends Character {
 
         Paint paintBlack = new Paint();
         paintBlack.setColor(Color.parseColor("#9e9e9e"));
-        int total = 8;
+        int total = getDimension();
         float lado = width / total;
         for(int i = 0; i < total; i++){
             for(int j = 0; j < total; j++){
@@ -38,5 +48,14 @@ public class Board extends Character {
                 }
             }
         }
+        piece.doDraw(canvas);
+    }
+
+    public int getDimension() {
+        return dimension;
+    }
+
+    public void setDimension(int dimension) {
+        this.dimension = dimension;
     }
 }
