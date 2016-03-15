@@ -3,6 +3,7 @@ package com.ameteam.game.magneton.actors;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -16,23 +17,16 @@ public class Board extends Character {
     private int dimension;
     private List<Piece> lstPieces;
 
+    //Effect circle on move
+    private boolean isMoving;
+    private float movX, movY;
+
     public Board(Scene scene, int dimension) {
         super(scene);
         this.dimension = dimension;
 
         lstPieces = new ArrayList<>();
-
-        Piece piece = new Piece(scene,this);
-        piece.setType(1);
-        piece.setPositionX(1);
-        piece.setPositionY(3);
-        lstPieces.add(piece);
-
-        /*Piece piece2 = new Piece(scene,this);
-        piece2.setType(2);
-        piece2.setPositionX(3);
-        piece2.setPositionY(4);
-        lstPieces.add(piece2);*/
+        isMoving = false;
     }
 
     @Override
@@ -67,6 +61,33 @@ public class Board extends Character {
         for(Piece p: lstPieces){
             p.doDraw(canvas);
         }
+
+        if(isMoving){
+            paint.setColor(Color.parseColor("#88616161"));
+            float movW = (float) ((getWidth() / getDimension()) * 1.1);
+            float movH = (float) ((getHeight() / getDimension()) * 1.1);
+
+            RectF rect = new RectF();
+            rect.set(movX - movW / 2, movY - movH /2, movX + movW / 2, movY + movH / 2);
+            canvas.drawOval(rect, paint);
+
+            int posX= (int) ((movX - this.x)/(getWidth()/getDimension()));
+            int posY= (int) ((movY - this.y)/(getHeight()/getDimension()));
+
+            Piece squarePiece = new Piece();
+            squarePiece.setPositionX(posX);
+            squarePiece.setPositionY(posY);
+
+            if(!lstPieces.contains(squarePiece)) {
+                float squareX = getX() + posX * getWidth() / getDimension();
+                float squareY = getY() + posY * getHeight() / getDimension();
+
+                paint.setColor(Color.parseColor("#AAFFFFFF"));
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth((getWidth() / getDimension()) * 0.04f);
+                canvas.drawRect(squareX, squareY, squareX + getWidth() / getDimension(), squareY + getHeight() / getDimension(), paint);
+            }
+        }
     }
 
     public int getDimension() {
@@ -93,7 +114,12 @@ public class Board extends Character {
 
     @Override
     public void actionOnTouch(float x, float y) {
-        if(y>this.y && y<this.y+getHeight()){
+    }
+
+    @Override
+    public void actionOnTouchUp(float x, float y) {
+        if(validateInside(x, y)){
+
             int posX= (int) ((x-this.x)/(getWidth()/getDimension()));
             int posY= (int) ((y-this.y)/(getHeight()/getDimension()));
 
@@ -107,6 +133,22 @@ public class Board extends Character {
                 lstPieces.add(piece);
             }
         }
+        isMoving = false;
+    }
+
+    @Override
+    public void actionOnTouchMove(float x, float y) {
+        if(validateInside(x , y)){
+            initMoving(x, y);
+        }else{
+            isMoving = false;
+        }
+    }
+
+    public void initMoving(float x, float y){
+        isMoving = true;
+        this.movX = x;
+        this.movY = y;
     }
 
 }

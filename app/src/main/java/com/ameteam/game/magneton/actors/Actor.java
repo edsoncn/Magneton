@@ -35,6 +35,10 @@ public abstract class Actor {
 
     public abstract void actionOnTouch(float x, float y);
 
+    public abstract void actionOnTouchUp(float x, float y);
+
+    public abstract void actionOnTouchMove(float x, float y);
+
     public void setDimensions(float width, float height){
         this.width = width;
         this.height = height;
@@ -43,6 +47,11 @@ public abstract class Actor {
     public void setPosition(float x, float y){
         this.x = x;
         this.y = y;
+    }
+
+    public boolean validateInside(float x ,float y){
+        return y>this.y && y<this.y+getHeight()
+                && x>this.x && x<this.x+getWidth();
     }
 
     public float getWidth() {

@@ -55,9 +55,14 @@ public class Button extends Character{
     public void actionOnTouch(float x, float y) {
     }
 
-    public boolean validateTouch(float x, float y){
-        return getX() < x && x <= getX() + getWidth()
-                && getY() < y && y <= getY() + getHeight();
+    @Override
+    public void actionOnTouchUp(float x, float y) {
+
+    }
+
+    @Override
+    public void actionOnTouchMove(float x, float y) {
+
     }
 
     public String getText() {

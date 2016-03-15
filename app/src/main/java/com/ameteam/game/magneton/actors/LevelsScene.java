@@ -53,13 +53,26 @@ public class LevelsScene extends Scene {
     public void actionOnTouch(float x, float y) {
         Log.i("LevelsScene", "Touch: x=" + x + ", y=" + y);
 
-        if(buttonEasy.validateTouch(x, y)){
-            //TODO
-        }else if(buttonMedium.validateTouch(x, y)){
-            //TODO
-        }else if(buttonHard.validateTouch(x, y)){
-            //TODO
+        if(buttonEasy.validateInside(x, y)){
+            getMagnetonGame().setLevel(MagnetonGame.LEVEL_EASY);
+            getMagnetonGame().changeState(MagnetonGame.STATE_RUNNING);
+        }else if(buttonMedium.validateInside(x, y)){
+            getMagnetonGame().setLevel(MagnetonGame.LEVEL_MEDIUM);
+            getMagnetonGame().changeState(MagnetonGame.STATE_RUNNING);
+        }else if(buttonHard.validateInside(x, y)){
+            getMagnetonGame().setLevel(MagnetonGame.LEVEL_HARD);
+            getMagnetonGame().changeState(MagnetonGame.STATE_RUNNING);
         }
+    }
+
+    @Override
+    public void actionOnTouchUp(float x, float y) {
+
+    }
+
+    @Override
+    public void actionOnTouchMove(float x, float y) {
+
     }
 
     @Override

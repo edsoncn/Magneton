@@ -55,6 +55,16 @@ public class PlayScene extends Scene {
     }
 
     @Override
+    public void actionOnTouchUp(float x, float y) {
+        board.actionOnTouchUp(x, y);
+    }
+
+    @Override
+    public void actionOnTouchMove(float x, float y) {
+        board.actionOnTouchMove(x, y);
+    }
+
+    @Override
     public void resize(int width, int height) {
         float p = 0.96f; //proportion
         float r = 16.0f / 10.0f; //ratio

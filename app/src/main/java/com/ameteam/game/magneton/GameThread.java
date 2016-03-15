@@ -156,16 +156,36 @@ public abstract class GameThread extends Thread {
 	
 	//Finger touches the screen
 	public boolean onTouch(MotionEvent e) {
-		if(e.getAction() != MotionEvent.ACTION_DOWN) return false;
+		if(e.getAction() != MotionEvent.ACTION_DOWN &&
+				e.getAction() != MotionEvent.ACTION_UP &&
+				e.getAction() != MotionEvent.ACTION_MOVE) return false;
 
 		synchronized (mSurfaceHolder) {
-				this.actionOnTouch(e.getRawX(), e.getRawY());
+				switch (e.getAction()) {
+					case MotionEvent.ACTION_DOWN:
+						this.actionOnTouch(e.getRawX(), e.getRawY());
+						break;
+					case MotionEvent.ACTION_UP:
+						this.actionOnTouchUp(e.getRawX(), e.getRawY());
+						break;
+					case MotionEvent.ACTION_MOVE:
+						this.actionOnTouchMove(e.getRawX(), e.getRawY());
+						break;
+				}
 		}
 		 
 		return false;
 	}
 	
 	protected void actionOnTouch(float x, float y) {
+		//Override to do something
+	}
+
+	protected void actionOnTouchUp(float x, float y) {
+		//Override to do something
+	}
+
+	protected void actionOnTouchMove(float x, float y) {
 		//Override to do something
 	}
 

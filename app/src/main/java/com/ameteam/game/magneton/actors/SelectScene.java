@@ -47,13 +47,23 @@ public class SelectScene extends Scene {
     @Override
     public void actionOnTouch(float x, float y) {
         Log.i("SelectScene", "Touch: x=" + x + ", y=" + y);
-        if(button6x6.validateTouch(x, y)){
+        if(button6x6.validateInside(x, y)){
             getMagnetonGame().setDimension(MagnetonGame.DIMENSION_6x6);
-            getMagnetonGame().changeState(MagnetonGame.STATE_RUNNING);
-        }else if(button8x8.validateTouch(x, y)){
+            getMagnetonGame().changeState(MagnetonGame.STATE_LEVELS);
+        }else if(button8x8.validateInside(x, y)){
             getMagnetonGame().setDimension(MagnetonGame.DIMENSION_8x8);
-            getMagnetonGame().changeState(MagnetonGame.STATE_RUNNING);
+            getMagnetonGame().changeState(MagnetonGame.STATE_LEVELS);
         }
+    }
+
+    @Override
+    public void actionOnTouchUp(float x, float y) {
+
+    }
+
+    @Override
+    public void actionOnTouchMove(float x, float y) {
+
     }
 
     @Override

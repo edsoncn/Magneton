@@ -83,7 +83,7 @@ public class MagnetonGame extends GameThread {
         if(stateToChange != stateGame){
 
             switch (stateGame){
-                case STATE_READY:
+                case STATE_LEVELS:
                     switch (stateToChange){
                         case STATE_RUNNING:
                             playScene.getBoard().init();
@@ -120,6 +120,38 @@ public class MagnetonGame extends GameThread {
                 break;
             case STATE_LEVELS:
                 levelsScene.actionOnTouch(x, y);
+                break;
+        }
+    }
+
+    @Override
+    protected void actionOnTouchUp(float x, float y) {
+        super.actionOnTouchUp(x, y);
+        switch (stateGame){
+            case STATE_READY:
+                selectScene.actionOnTouchUp(x, y);
+                break;
+            case STATE_RUNNING:
+                playScene.actionOnTouchUp(x, y);
+                break;
+            case STATE_LEVELS:
+                levelsScene.actionOnTouchUp(x, y);
+                break;
+        }
+    }
+
+    @Override
+    protected void actionOnTouchMove(float x, float y) {
+        super.actionOnTouchMove(x, y);
+        switch (stateGame){
+            case STATE_READY:
+                selectScene.actionOnTouchMove(x, y);
+                break;
+            case STATE_RUNNING:
+                playScene.actionOnTouchMove(x, y);
+                break;
+            case STATE_LEVELS:
+                levelsScene.actionOnTouchMove(x, y);
                 break;
         }
     }

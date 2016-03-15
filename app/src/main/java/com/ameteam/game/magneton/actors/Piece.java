@@ -23,6 +23,10 @@ public class Piece extends Character{
         this.board = board;
     }
 
+    public Piece(){
+        super(null);
+    }
+
     @Override
     public void init() {
         super.init();
@@ -54,6 +58,16 @@ public class Piece extends Character{
 
     @Override
     public void actionOnTouch(float x, float y) {
+
+    }
+
+    @Override
+    public void actionOnTouchUp(float x, float y) {
+
+    }
+
+    @Override
+    public void actionOnTouchMove(float x, float y) {
 
     }
 
