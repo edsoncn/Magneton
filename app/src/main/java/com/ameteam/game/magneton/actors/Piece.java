@@ -14,6 +14,7 @@ public class Piece extends Character{
     private int positionX;
     private int positionY;
     private Board board;
+    private float m;
 
     public static int RED = 1;
     public static int BLUE = 2;
@@ -30,6 +31,7 @@ public class Piece extends Character{
     @Override
     public void init() {
         super.init();
+        this.m = 1;
     }
 
     @Override
@@ -48,7 +50,7 @@ public class Piece extends Character{
     @Override
     public void resize() {
         setDimensions((float) (board.getWidth() / board.getDimension() * 0.9), (float) (board.getHeight() / board.getDimension() * 0.9));
-        setPosition(this.board.getX()+getPositionX()*board.getWidth()/board.getDimension(),this.board.getY()+getPositionY()*board.getHeight()/board.getDimension());
+        setPosition(this.board.getX() + getPositionX() * board.getWidth() / board.getDimension(), this.board.getY() + getPositionY() * board.getHeight() / board.getDimension());
     }
 
     @Override
@@ -113,4 +115,11 @@ public class Piece extends Character{
         this.positionY = positionY;
     }
 
+    public float getM() {
+        return m;
+    }
+
+    public void setM(float m) {
+        this.m = m;
+    }
 }

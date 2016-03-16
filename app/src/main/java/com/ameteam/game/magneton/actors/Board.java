@@ -16,10 +16,12 @@ public class Board extends Character {
 
     private int dimension;
     private List<Piece> lstPieces;
+    private Piece lastPiece;
 
     //Effect circle on move
     private boolean isMoving;
     private float movX, movY;
+    public final float K = 125;
 
     public Board(Scene scene, int dimension) {
         super(scene);
@@ -38,6 +40,9 @@ public class Board extends Character {
         for(Piece p: lstPieces){
             p.init();
         }
+
+        this.lastPiece = null;
+
     }
 
     @Override
@@ -98,6 +103,22 @@ public class Board extends Character {
         this.dimension = dimension;
     }
 
+    public Piece getLastPiece() {
+        return lastPiece;
+    }
+
+    public void setLastPiece(Piece lastPiece) {
+        this.lastPiece = lastPiece;
+    }
+
+    public List<Piece> getLstPieces() {
+        return lstPieces;
+    }
+
+    public void setLstPieces(List<Piece> lstPieces) {
+        this.lstPieces = lstPieces;
+    }
+
     @Override
     public void resize() {
         setDimensions(scene.getWidth(), scene.getWidth());
@@ -110,15 +131,51 @@ public class Board extends Character {
 
     @Override
     public void update(float secondsElapsed) {
+        if(getLastPiece() != null){
+            if (getLstPieces().size() > 1) {
+                boolean isMovingPieces = false;
+                for (Piece p : lstPieces) {
+                    if (!p.equals(lastPiece)) {
+                        float dx = p.getX() - lastPiece.getX();
+                        float dy = p.getY() - lastPiece.getY();
+                        float dx2 = (float) (Math.pow(dx, 2));
+                        float dy2 = (float) (Math.pow(dy, 2));
+                        float d2 = dx2 + dy2;
+                        float d = (float) Math.sqrt(d2);
+                        if(d < getWidth() * 0.5f) {
+                            float a = (K * p.getM()) / d2;
+                            p.setAx(a * (dx / d));
+                            p.setAy(a * (dy / d));
+                            p.setVx(p.getVx() + p.getAx());
+                            p.setVy(p.getVy() + p.getAy());
+                            p.setX(p.getX() + p.getVx());
+                            p.setY(p.getY() + p.getVy());
+                            isMovingPieces = true;
+                        }
+                    }
+                }
+                if(!isMovingPieces){
+                    setLastPiece(null);
+                }
+            }else{
+                setLastPiece(null);
+            }
+        }
     }
 
     @Override
     public void actionOnTouch(float x, float y) {
+        if(validateInside(x, y)) {
+            initMoving(x, y);
+        }else{
+            isMoving = false;
+        }
+        Log.i("Board", "size: "+lstPieces.size());
     }
 
     @Override
     public void actionOnTouchUp(float x, float y) {
-        if(validateInside(x, y)){
+        if(validateInside(x, y) && lastPiece == null && isMoving){
 
             int posX= (int) ((x-this.x)/(getWidth()/getDimension()));
             int posY= (int) ((y-this.y)/(getHeight()/getDimension()));
@@ -131,6 +188,7 @@ public class Board extends Character {
                 piece.init();
                 piece.resize();
                 lstPieces.add(piece);
+                lastPiece = piece;
             }
         }
         isMoving = false;
@@ -138,9 +196,9 @@ public class Board extends Character {
 
     @Override
     public void actionOnTouchMove(float x, float y) {
-        if(validateInside(x , y)){
+        if(validateInside(x , y) && isMoving){
             initMoving(x, y);
-        }else{
+        }else if(isMoving){
             isMoving = false;
         }
     }

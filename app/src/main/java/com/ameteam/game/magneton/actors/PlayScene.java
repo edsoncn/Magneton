@@ -46,7 +46,7 @@ public class PlayScene extends Scene {
 
     @Override
     public void update(float secondsElapsed) {
-
+        board.update(secondsElapsed);
     }
 
     @Override

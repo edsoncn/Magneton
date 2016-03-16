@@ -16,8 +16,8 @@ public abstract class Actor {
     protected float y;
 
     /* velocity and acceleration */
-    protected float v;
-    protected float a;
+    protected float vx,vy;
+    protected float ax,ay;
 
     public Actor(){
     }
@@ -25,8 +25,10 @@ public abstract class Actor {
     public void init(){
         setDimensions(0, 0);
         setPosition(0, 0);
-        setV(0);
-        setA(0);
+        setVx(0);
+        setVy(0);
+        setAx(0);
+        setAy(0);
     }
 
     public abstract void doDraw(Canvas canvas);
@@ -86,20 +88,35 @@ public abstract class Actor {
         this.y = y;
     }
 
-    public float getV() {
-        return v;
+    public float getVx() {
+        return vx;
     }
 
-    public void setV(float v) {
-        this.v = v;
+    public void setVx(float vx) {
+        this.vx = vx;
     }
 
-    public float getA() {
-        return a;
+    public float getVy() {
+        return vy;
     }
 
-    public void setA(float a) {
-        this.a = a;
+    public void setVy(float vy) {
+        this.vy = vy;
     }
 
+    public float getAx() {
+        return ax;
+    }
+
+    public void setAx(float ax) {
+        this.ax = ax;
+    }
+
+    public float getAy() {
+        return ay;
+    }
+
+    public void setAy(float ay) {
+        this.ay = ay;
+    }
 }
