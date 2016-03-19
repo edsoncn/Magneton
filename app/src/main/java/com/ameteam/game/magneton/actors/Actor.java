@@ -25,6 +25,10 @@ public abstract class Actor {
     public void init(){
         setDimensions(0, 0);
         setPosition(0, 0);
+        resetMoving();
+    }
+
+    public void resetMoving(){
         setVx(0);
         setVy(0);
         setAx(0);
@@ -119,4 +123,26 @@ public abstract class Actor {
     public void setAy(float ay) {
         this.ay = ay;
     }
+
+    public float getCenterX(){
+        return getX() + getWidth() / 2;
+    }
+
+    public float getCenterY(){
+        return getY() + getHeight() / 2;
+    }
+
+    public void setCenterX(float centerX){
+        setX(centerX - getWidth() / 2);
+    }
+
+    public void setCenterY(float centerY){
+        setY(centerY - getHeight() /2);
+    }
+
+    public void setCenter(float centerX, float centerY){
+        setCenterX(centerX);
+        setCenterY(centerY);
+    }
+
 }

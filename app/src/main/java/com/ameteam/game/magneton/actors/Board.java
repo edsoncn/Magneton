@@ -14,35 +14,57 @@ import java.util.List;
  */
 public class Board extends Character {
 
+    public static final int STATE_TURN_PLAYER = 0;
+    public static final int STATE_TURN_MACHINE = 1;
+    public static final int STATE_PLAYER_MOVING = 2;
+    public static final int STATE_MAGNETIC_EFECT = 3;
+
+    private int state;
+
     private int dimension;
     private List<Piece> lstPieces;
     private Piece lastPiece;
 
     //Effect circle on move
     private boolean isMoving;
+
     private float movX, movY;
-    public final float K = 125;
+    public final float K = 0.0004f; // Gravitational constant
+    public final float FF = 0.0001f; // Frictional force
 
     public Board(Scene scene, int dimension) {
         super(scene);
         this.dimension = dimension;
-
-        lstPieces = new ArrayList<>();
-        isMoving = false;
     }
 
     @Override
     public void init() {
         super.init();
 
+        state = STATE_TURN_PLAYER;
         this.setDimension(scene.getMagnetonGame().getDimension());
-        
-        for(Piece p: lstPieces){
-            p.init();
-        }
 
-        this.lastPiece = null;
+        lstPieces = new ArrayList<>();
+        isMoving = false;
+        lastPiece = null;
 
+    }
+
+    public void initStateTurnPlayer(){
+        isMoving = false;
+        state = STATE_TURN_PLAYER;
+    }
+
+    public void initStateTurnMachine(){
+        state = STATE_TURN_MACHINE;
+    }
+    public void initStatePlayerMoving(){
+        isMoving = true;
+        lastPiece = null;
+        state = STATE_PLAYER_MOVING;
+    }
+    public void initStateMagneticEfect(){
+        state = STATE_MAGNETIC_EFECT;
     }
 
     @Override
@@ -67,33 +89,151 @@ public class Board extends Character {
             p.doDraw(canvas);
         }
 
-        if(isMoving){
-            paint.setColor(Color.parseColor("#88616161"));
-            float movW = (float) ((getWidth() / getDimension()) * 1.1);
-            float movH = (float) ((getHeight() / getDimension()) * 1.1);
+        switch (state){
+            case STATE_PLAYER_MOVING:
+                paint.setColor(Color.parseColor("#88616161"));
+                float movW = (float) ((getWidth() / getDimension()) * 1.1);
+                float movH = (float) ((getHeight() / getDimension()) * 1.1);
 
-            RectF rect = new RectF();
-            rect.set(movX - movW / 2, movY - movH /2, movX + movW / 2, movY + movH / 2);
-            canvas.drawOval(rect, paint);
+                RectF rect = new RectF();
+                rect.set(movX - movW / 2, movY - movH /2, movX + movW / 2, movY + movH / 2);
+                canvas.drawOval(rect, paint);
 
-            int posX= (int) ((movX - this.x)/(getWidth()/getDimension()));
-            int posY= (int) ((movY - this.y)/(getHeight()/getDimension()));
+                int posX= (int) ((movX - this.x)/(getWidth()/getDimension()));
+                int posY= (int) ((movY - this.y)/(getHeight()/getDimension()));
 
-            Piece squarePiece = new Piece();
-            squarePiece.setPositionX(posX);
-            squarePiece.setPositionY(posY);
+                Piece squarePiece = new Piece();
+                squarePiece.setPositionX(posX);
+                squarePiece.setPositionY(posY);
 
-            if(!lstPieces.contains(squarePiece)) {
-                float squareX = getX() + posX * getWidth() / getDimension();
-                float squareY = getY() + posY * getHeight() / getDimension();
+                if(!lstPieces.contains(squarePiece)) {
+                    float squareX = getX() + posX * getWidth() / getDimension();
+                    float squareY = getY() + posY * getHeight() / getDimension();
 
-                paint.setColor(Color.parseColor("#AAFFFFFF"));
-                paint.setStyle(Paint.Style.STROKE);
-                paint.setStrokeWidth((getWidth() / getDimension()) * 0.04f);
-                canvas.drawRect(squareX, squareY, squareX + getWidth() / getDimension(), squareY + getHeight() / getDimension(), paint);
+                    paint.setColor(Color.parseColor("#AAFFFFFF"));
+                    paint.setStyle(Paint.Style.STROKE);
+                    paint.setStrokeWidth((getWidth() / getDimension()) * 0.04f);
+                    canvas.drawRect(squareX, squareY, squareX + getWidth() / getDimension(), squareY + getHeight() / getDimension(), paint);
+                }
+                break;
+        }
+    }
+    @Override
+    public void resize() {
+        setDimensions(scene.getWidth(), scene.getWidth());
+        setPosition(scene.getX(), scene.getY() + (scene.getHeight() - height) / 2);
+
+        for(Piece p: lstPieces){
+            p.resize();
+        }
+    }
+
+    @Override
+    public void update(float secondsElapsed) {
+        switch (state){
+            case STATE_MAGNETIC_EFECT:
+                updateStateMagneticEfect();
+                break;
+        }
+
+    }
+
+    private void updateStateMagneticEfect(){
+        if (getLstPieces().size() > 1) {
+            boolean isMovingPieces = false;
+            for (Piece p : lstPieces) {
+                if (!p.equals(lastPiece) && p.getM() > 0) {
+                    float dx = p.getCenterX() - lastPiece.getCenterX();
+                    float dy = p.getCenterY() - lastPiece.getCenterY();
+                    float dx2 = (float) (Math.pow(dx, 2));
+                    float dy2 = (float) (Math.pow(dy, 2));
+                    float d2 = dx2 + dy2;
+                    float d = (float) Math.sqrt(d2);
+                    float a = ((K * (float)Math.pow(getWidth(), 3)) * p.getM()) / d2 - (FF * getWidth());
+                    p.setAx(a * (dx / d));
+                    p.setAy(a * (dy / d));
+                    p.setVx(p.getVx() + p.getAx());
+                    p.setVy(p.getVy() + p.getAy());
+                    if(p.getVx() * dx > 0 || p.getVy() * dy > 0) {
+                        p.setCenterX(p.getCenterX() + p.getVx());
+                        p.setCenterY(p.getCenterY() + p.getVy());
+                        isMovingPieces = true;
+                    }else{
+                        Log.i("Board", "dx="+dx+", dy="+dy+", vx="+p.getVx()+", vy="+p.getVy());
+                        p.setM(0);
+                    }
+                }
+            }
+            if(!isMovingPieces){
+                for (Piece p : lstPieces) {
+                    p.resetMoving();
+                    p.setM(1);
+                }
+                initStateTurnPlayer();
+            }
+        }else{
+            initStateTurnPlayer();
+        }
+    }
+
+    @Override
+    public void actionOnTouch(float x, float y) {
+        if(validateInside(x, y)) {
+            switch (state){
+                case STATE_TURN_PLAYER:
+                    initMoving(x, y);
+                    initStatePlayerMoving();
+                    break;
             }
         }
     }
+
+    @Override
+    public void actionOnTouchUp(float x, float y) {
+        if(validateInside(x, y)){
+            switch (state) {
+                case STATE_PLAYER_MOVING:
+                    int posX = (int) ((x - this.x) / (getWidth() / getDimension()));
+                    int posY = (int) ((y - this.y) / (getHeight() / getDimension()));
+
+                    Piece piece = new Piece(scene, this);
+                    piece.setPositionX(posX);
+                    piece.setPositionY(posY);
+                    if (!lstPieces.contains(piece)) {
+                        piece.setType(lstPieces.size() % 2 == 0 ? 2 : 1);
+                        piece.init();
+                        piece.resize();
+                        lstPieces.add(piece);
+                        lastPiece = piece;
+                    }
+                    initStateMagneticEfect();
+                    break;
+            }
+        }else{
+            switch (state) {
+                case STATE_PLAYER_MOVING:
+                    initStateTurnPlayer();
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public void actionOnTouchMove(float x, float y) {
+        if(validateInside(x , y)){
+            switch (state) {
+                case STATE_PLAYER_MOVING:
+                    initMoving(x, y);
+                    break;
+            }
+        }
+    }
+
+    public void initMoving(float x, float y){
+        this.movX = x;
+        this.movY = y;
+    }
+
 
     public int getDimension() {
         return dimension;
@@ -117,96 +257,6 @@ public class Board extends Character {
 
     public void setLstPieces(List<Piece> lstPieces) {
         this.lstPieces = lstPieces;
-    }
-
-    @Override
-    public void resize() {
-        setDimensions(scene.getWidth(), scene.getWidth());
-        setPosition(scene.getX(), scene.getY() + (scene.getHeight() - height) / 2);
-
-        for(Piece p: lstPieces){
-            p.resize();
-        }
-    }
-
-    @Override
-    public void update(float secondsElapsed) {
-        if(getLastPiece() != null){
-            if (getLstPieces().size() > 1) {
-                boolean isMovingPieces = false;
-                for (Piece p : lstPieces) {
-                    if (!p.equals(lastPiece)) {
-                        float dx = p.getX() - lastPiece.getX();
-                        float dy = p.getY() - lastPiece.getY();
-                        float dx2 = (float) (Math.pow(dx, 2));
-                        float dy2 = (float) (Math.pow(dy, 2));
-                        float d2 = dx2 + dy2;
-                        float d = (float) Math.sqrt(d2);
-                        if(d < getWidth() * 0.5f) {
-                            float a = (K * p.getM()) / d2;
-                            p.setAx(a * (dx / d));
-                            p.setAy(a * (dy / d));
-                            p.setVx(p.getVx() + p.getAx());
-                            p.setVy(p.getVy() + p.getAy());
-                            p.setX(p.getX() + p.getVx());
-                            p.setY(p.getY() + p.getVy());
-                            isMovingPieces = true;
-                        }
-                    }
-                }
-                if(!isMovingPieces){
-                    setLastPiece(null);
-                }
-            }else{
-                setLastPiece(null);
-            }
-        }
-    }
-
-    @Override
-    public void actionOnTouch(float x, float y) {
-        if(validateInside(x, y)) {
-            initMoving(x, y);
-        }else{
-            isMoving = false;
-        }
-        Log.i("Board", "size: "+lstPieces.size());
-    }
-
-    @Override
-    public void actionOnTouchUp(float x, float y) {
-        if(validateInside(x, y) && lastPiece == null && isMoving){
-
-            int posX= (int) ((x-this.x)/(getWidth()/getDimension()));
-            int posY= (int) ((y-this.y)/(getHeight()/getDimension()));
-
-            Piece piece = new Piece(scene,this);
-            piece.setPositionX(posX);
-            piece.setPositionY(posY);
-            if(!lstPieces.contains(piece)) {
-                piece.setType(lstPieces.size() % 2 == 0 ? 2 : 1);
-                piece.init();
-                piece.resize();
-                lstPieces.add(piece);
-                lastPiece = piece;
-            }
-        }
-        isMoving = false;
-    }
-
-    @Override
-    public void actionOnTouchMove(float x, float y) {
-        if(validateInside(x , y) && isMoving){
-            initMoving(x, y);
-        }else if(isMoving){
-            isMoving = false;
-        }
-    }
-
-    public void initMoving(float x, float y){
-        isMoving = true;
-        this.movX = x;
-        this.movY = y;
     }
 
 }
