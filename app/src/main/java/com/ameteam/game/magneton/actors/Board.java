@@ -6,6 +6,9 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
 
+import com.ameteam.game.magneton.MagnetonGame;
+import com.ameteam.game.magneton.ai.GameState;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,10 +17,9 @@ import java.util.List;
  */
 public class Board extends Character {
 
-    public static final int STATE_TURN_PLAYER = 0;
-    public static final int STATE_TURN_MACHINE = 1;
-    public static final int STATE_PLAYER_MOVING = 2;
-    public static final int STATE_MAGNETIC_EFECT = 3;
+    public static final int STATE_WAITING = 0;
+    public static final int STATE_PLAYER_MOVING = 1;
+    public static final int STATE_MAGNETIC_EFECT = 2;
 
     private int state;
 
@@ -26,11 +28,9 @@ public class Board extends Character {
     private Piece lastPiece;
 
     //Effect circle on move
-    private boolean isMoving;
-
     private float movX, movY;
-    public final float K = 0.0004f; // Gravitational constant
-    public final float FF = 0.0001f; // Frictional force
+    public final float K = 0.00075f; // Gravitational constant
+    public final float FF = 0.00015f; // Frictional force
 
     public Board(Scene scene, int dimension) {
         super(scene);
@@ -41,29 +41,31 @@ public class Board extends Character {
     public void init() {
         super.init();
 
-        state = STATE_TURN_PLAYER;
+        state = STATE_WAITING;
         this.setDimension(scene.getMagnetonGame().getDimension());
 
         lstPieces = new ArrayList<>();
-        isMoving = false;
         lastPiece = null;
-
     }
 
-    public void initStateTurnPlayer(){
-        isMoving = false;
-        state = STATE_TURN_PLAYER;
+    public void initStateWaiting(){
+        for (Piece p : lstPieces) {
+            p.initStateWait();
+        }
+        scene.getMagnetonGame().setState(MagnetonGame.STATE_READY);
+        state = STATE_WAITING;
     }
 
-    public void initStateTurnMachine(){
-        state = STATE_TURN_MACHINE;
-    }
     public void initStatePlayerMoving(){
-        isMoving = true;
         lastPiece = null;
+
+        scene.getMagnetonGame().setState(MagnetonGame.STATE_READY);
         state = STATE_PLAYER_MOVING;
     }
     public void initStateMagneticEfect(){
+        lastPiece.initStateMagneticEfect();
+
+        scene.getMagnetonGame().setState(MagnetonGame.STATE_RUNNING);
         state = STATE_MAGNETIC_EFECT;
     }
 
@@ -77,49 +79,57 @@ public class Board extends Character {
         paintBlack.setColor(Color.parseColor("#9e9e9e"));
         int total = getDimension();
         float lado = width / total;
-        for(int i = 0; i < total; i++){
-            for(int j = 0; j < total; j++){
+        for (int i = 0; i < total; i++) {
+            for (int j = 0; j < total; j++) {
                 int pos = i * total + j;
-                if((pos + (i % 2 == 0 ? 0 : 1)) % 2 == 0){
+                if ((pos + (i % 2 == 0 ? 0 : 1)) % 2 == 0) {
                     canvas.drawRect(x + j * lado, y + i * lado, x + (j + 1) * lado, y + (i + 1) * lado, paintBlack);
                 }
             }
         }
-        for(Piece p: lstPieces){
-            p.doDraw(canvas);
+
+        synchronized (lstPieces) {
+            for (Piece p : lstPieces) {
+                p.doDraw(canvas);
+            }
         }
 
-        switch (state){
+        switch (state) {
             case STATE_PLAYER_MOVING:
-                paint.setColor(Color.parseColor("#88616161"));
-                float movW = (float) ((getWidth() / getDimension()) * 1.1);
-                float movH = (float) ((getHeight() / getDimension()) * 1.1);
+                int posX = getPositionXByX(movX);
+                int posY = getPositionYByY(movY);
 
-                RectF rect = new RectF();
-                rect.set(movX - movW / 2, movY - movH /2, movX + movW / 2, movY + movH / 2);
-                canvas.drawOval(rect, paint);
+                if(0 <= posX && posX < dimension && 0 <= posY && posY < dimension) {
+                    Piece squarePiece = new Piece();
+                    squarePiece.setPositionX(posX);
+                    squarePiece.setPositionY(posY);
 
-                int posX= (int) ((movX - this.x)/(getWidth()/getDimension()));
-                int posY= (int) ((movY - this.y)/(getHeight()/getDimension()));
+                    if (!lstPieces.contains(squarePiece)) {
+                        float squareX = getX() + posX * getWidth() / getDimension();
+                        float squareY = getY() + posY * getHeight() / getDimension();
 
-                Piece squarePiece = new Piece();
-                squarePiece.setPositionX(posX);
-                squarePiece.setPositionY(posY);
+                        paint.setColor(Color.parseColor("#FFFFFF"));
+                        paint.setStyle(Paint.Style.STROKE);
+                        paint.setStrokeWidth((getWidth() / getDimension()) * 0.075f);
+                        paint.setStrokeCap(Paint.Cap.ROUND);
+                        paint.setStrokeJoin(Paint.Join.ROUND);
+                        canvas.drawRect(squareX, squareY, squareX + getWidth() / getDimension(), squareY + getHeight() / getDimension(), paint);
+                    }
 
-                if(!lstPieces.contains(squarePiece)) {
-                    float squareX = getX() + posX * getWidth() / getDimension();
-                    float squareY = getY() + posY * getHeight() / getDimension();
+                    paint.setStyle(Paint.Style.FILL);
+                    paint.setColor(Color.parseColor("#40000000"));
+                    float movW = (float) ((getWidth() / getDimension()) * 1.125);
+                    float movH = (float) ((getHeight() / getDimension()) * 1.125);
 
-                    paint.setColor(Color.parseColor("#AAFFFFFF"));
-                    paint.setStyle(Paint.Style.STROKE);
-                    paint.setStrokeWidth((getWidth() / getDimension()) * 0.04f);
-                    canvas.drawRect(squareX, squareY, squareX + getWidth() / getDimension(), squareY + getHeight() / getDimension(), paint);
+                    RectF rect = new RectF();
+                    rect.set(movX - movW / 2, movY - movH / 2, movX + movW / 2, movY + movH / 2);
+                    canvas.drawOval(rect, paint);
+                    break;
                 }
-                break;
         }
     }
     @Override
-    public void resize() {
+    public void resize () {
         setDimensions(scene.getWidth(), scene.getWidth());
         setPosition(scene.getX(), scene.getY() + (scene.getHeight() - height) / 2);
 
@@ -130,110 +140,201 @@ public class Board extends Character {
 
     @Override
     public void update(float secondsElapsed) {
-        switch (state){
+        switch (state) {
             case STATE_MAGNETIC_EFECT:
                 updateStateMagneticEfect();
                 break;
         }
-
     }
 
     private void updateStateMagneticEfect(){
         if (getLstPieces().size() > 1) {
             boolean isMovingPieces = false;
             for (Piece p : lstPieces) {
-                if (!p.equals(lastPiece) && p.getM() > 0) {
+                if (!p.equals(lastPiece) && p.getM() != 0) {
                     float dx = p.getCenterX() - lastPiece.getCenterX();
                     float dy = p.getCenterY() - lastPiece.getCenterY();
                     float dx2 = (float) (Math.pow(dx, 2));
                     float dy2 = (float) (Math.pow(dy, 2));
                     float d2 = dx2 + dy2;
                     float d = (float) Math.sqrt(d2);
-                    float a = ((K * (float)Math.pow(getWidth(), 3)) * p.getM()) / d2 - (FF * getWidth());
+                    float a = ((K * (float)Math.pow(getWidth(), 3)) * p.getM()) / d2 - (FF * getWidth() * p.getM());
+
                     p.setAx(a * (dx / d));
                     p.setAy(a * (dy / d));
                     p.setVx(p.getVx() + p.getAx());
                     p.setVy(p.getVy() + p.getAy());
-                    if(p.getVx() * dx > 0 || p.getVy() * dy > 0) {
+
+                    float stopX = getCenterXByPositionX(p.getStopPosX());
+                    float stopY = getCenterYByPositionY(p.getStopPosY());
+
+                    float iniX = getCenterXByPositionX(p.getPositionX());
+                    float iniY = getCenterYByPositionY(p.getPositionY());
+
+                    float dStopIni2 = (float)Math.pow(stopX - iniX, 2) + (float)Math.pow(stopY - iniY, 2);
+                    float dPieceIni2 = (float)Math.pow((p.getCenterX() + p.getVx()) - iniX, 2) + (float)Math.pow((p.getCenterY() + p.getVy()) - iniY, 2);
+
+                    boolean uncrossStop = dPieceIni2 < dStopIni2;
+
+                    if(uncrossStop){
                         p.setCenterX(p.getCenterX() + p.getVx());
                         p.setCenterY(p.getCenterY() + p.getVy());
                         isMovingPieces = true;
                     }else{
                         Log.i("Board", "dx="+dx+", dy="+dy+", vx="+p.getVx()+", vy="+p.getVy());
                         p.setM(0);
+                        p.setPositionX(p.getStopPosX());
+                        p.setPositionY(p.getStopPosY());
+                        p.resize();
                     }
                 }
             }
             if(!isMovingPieces){
-                for (Piece p : lstPieces) {
-                    p.resetMoving();
-                    p.setM(1);
-                }
-                initStateTurnPlayer();
+                lastPiece.initStateWait();
+                ((PlayScene)scene).changeTurn();
+                initStateWaiting();
             }
         }else{
-            initStateTurnPlayer();
+            lastPiece.initStateWait();
+            ((PlayScene)scene).changeTurn();
+            initStateWaiting();
         }
+    }
+
+    public void putPiece(int posX, int posY, int turn){
+        Piece piece = createPiece(posX, posY, turn);
+        lastPiece = piece;
+        initPiecesForMagneticEffect();
+        synchronized (lstPieces) {
+            lstPieces.add(piece);
+        }
+        initStateMagneticEfect();
     }
 
     @Override
-    public void actionOnTouch(float x, float y) {
-        if(validateInside(x, y)) {
-            switch (state){
-                case STATE_TURN_PLAYER:
-                    initMoving(x, y);
-                    initStatePlayerMoving();
-                    break;
-            }
-        }
-    }
+    public void actionOnTouch(float x, float y) {}
 
     @Override
-    public void actionOnTouchUp(float x, float y) {
-        if(validateInside(x, y)){
-            switch (state) {
-                case STATE_PLAYER_MOVING:
-                    int posX = (int) ((x - this.x) / (getWidth() / getDimension()));
-                    int posY = (int) ((y - this.y) / (getHeight() / getDimension()));
-
-                    Piece piece = new Piece(scene, this);
-                    piece.setPositionX(posX);
-                    piece.setPositionY(posY);
-                    if (!lstPieces.contains(piece)) {
-                        piece.setType(lstPieces.size() % 2 == 0 ? 2 : 1);
-                        piece.init();
-                        piece.resize();
-                        lstPieces.add(piece);
-                        lastPiece = piece;
-                    }
-                    initStateMagneticEfect();
-                    break;
-            }
-        }else{
-            switch (state) {
-                case STATE_PLAYER_MOVING:
-                    initStateTurnPlayer();
-                    break;
-            }
-        }
-    }
+    public void actionOnTouchUp(float x, float y) {}
 
     @Override
-    public void actionOnTouchMove(float x, float y) {
-        if(validateInside(x , y)){
-            switch (state) {
-                case STATE_PLAYER_MOVING:
-                    initMoving(x, y);
-                    break;
-            }
-        }
-    }
+    public void actionOnTouchMove(float x, float y) {}
 
     public void initMoving(float x, float y){
         this.movX = x;
         this.movY = y;
     }
 
+    public Piece createPiece(int positionX, int positionY, int turn){
+        Piece piece = new Piece(positionX, positionY, scene, this);
+        piece.init();
+        piece.resize();
+        if(turn == GameState.TURN_PLAYER){
+            piece.setType(Piece.RED);
+        }else{
+            piece.setType(Piece.BLUE);
+        }
+        return piece;
+    }
+
+    private final int[] DIRS_X = {-1, 0, 1,-1, 1,-1, 0, 1};
+    private final int[] DIRS_Y = {-1,-1,-1, 0, 0, 1, 1, 1};
+
+    public void initPiecesForMagneticEffect(){
+        for (Piece p : lstPieces) {
+            p.resetMoving();
+        }
+        for(int i = 0; i < DIRS_X.length; i++){
+            int dx = DIRS_X[i];
+            int dy = DIRS_Y[i];
+            //Log.i("Board", "DIR dx=" + dx + ", dy=" + dy);
+            Piece foundPiece = null;
+            int posX = lastPiece.getPositionX() + dx;
+            int posY = lastPiece.getPositionY() + dy;
+            //Log.i("Board", "sx=" + posX + ", sy=" + posY + " - lx=" + lastPiece.getPositionX() + ", ly=" + lastPiece.getPositionY());
+            while(0 <= posX && posX < dimension && 0 <= posY && posY < dimension){
+                foundPiece = validateIfContainsPieceReturn(posX, posY);
+                if(foundPiece != null){
+                    //Log.i("Board", "FOUND");
+                    if(foundPiece.getType() != lastPiece.getType()){
+                        foundPiece.setM(-1);
+                    }else{
+                        foundPiece.setM(1);
+                    }
+                    break;
+                }
+                posX += dx;
+                posY += dy;
+                //Log.i("Board", "sx=" + posX + ", sy=" + posY + " - lx=" + lastPiece.getPositionX() + ", ly=" + lastPiece.getPositionY());
+            }
+            if(foundPiece != null){
+                if(foundPiece.getM() < 0){
+                    foundPiece.setStopPosX(lastPiece.getPositionX() + dx);
+                    foundPiece.setStopPosY(lastPiece.getPositionY() + dy);
+                }else{
+                    posX += dx;
+                    posY += dy;
+                    while(0 <= posX && posX < dimension && 0 <= posY && posY < dimension){
+                        if(validateIfContainsPiece(posX, posY)){
+                            break;
+                        }
+                        posX += dx;
+                        posY += dy;
+                        //Log.i("Board", "sx=" + posX + ", sy=" + posY + " - lx=" + lastPiece.getPositionX() + ", ly=" + lastPiece.getPositionY());
+                    }
+                    foundPiece.setStopPosX(posX - dx);
+                    foundPiece.setStopPosY(posY - dy);
+                    //Log.i("Board", "Sx=" + foundPiece.getStopPosX() + ", Sy=" + foundPiece.getStopPosY());
+                }
+            }
+        }
+    }
+
+    public boolean validateIfContainsPiece(int x, int y){
+        for(Piece p : lstPieces){
+            if(p.getPositionX() == x && p.getPositionY() == y){
+                return true;
+            }
+        }
+        return false;
+    }
+    public Piece validateIfContainsPieceReturn(int x, int y){
+        for(Piece p : lstPieces){
+            if(p.getPositionX() == x && p.getPositionY() == y){
+                return p;
+            }
+        }
+        return null;
+    }
+
+    public int[][] getMatrix(){
+        int matrix[][] = new int[dimension][dimension];
+        for(int i = 0; i < dimension; i++){
+            for(int j = 0; j < dimension; j++){
+                matrix[i][j] = GameState.SQUARE_NOTHING;
+            }
+        }
+        for(Piece p : lstPieces){
+            matrix[p.getPositionX()][p.getPositionY()] = p.getType() == Piece.RED ? GameState.SQUARE_PLAYER : GameState.SQUARE_MACHINE;
+        }
+        return matrix;
+    }
+
+    public int getPositionXByX(float x){
+        return (int) ((x - this.x) / (getWidth() / getDimension()));
+    }
+
+    public int getPositionYByY(float y){
+        return (int) ((y - this.y) / (getHeight() / getDimension()));
+    }
+
+    public float getCenterXByPositionX(int posX){
+        return x + ((posX + 0.5f) * width) / dimension;
+    }
+
+    public float getCenterYByPositionY(int posY){
+        return y + ((posY + 0.5f) * height) / dimension;
+    }
 
     public int getDimension() {
         return dimension;
@@ -259,4 +360,11 @@ public class Board extends Character {
         this.lstPieces = lstPieces;
     }
 
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
+    }
 }

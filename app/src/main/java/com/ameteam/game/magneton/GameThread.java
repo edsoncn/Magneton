@@ -100,7 +100,7 @@ public abstract class GameThread extends Thread {
 			try {
 				canvasRun = mSurfaceHolder.lockCanvas(null);
 				synchronized (mSurfaceHolder) {
-					if (mMode == STATE_RUNNING || mMode == STATE_READY) {
+					if (mMode == STATE_RUNNING) {
 						updatePhysics();
 					}
 					doDraw(canvasRun);
@@ -124,8 +124,6 @@ public abstract class GameThread extends Thread {
 			mCanvasHeight = height;
 
 			resize(width, height);
-			// don't forget to resize the background image
-			//mBackgroundImage = Bitmap.createScaledBitmap(mBackgroundImage, width, height, true);
 		}
 	}
 
@@ -134,8 +132,6 @@ public abstract class GameThread extends Thread {
 	protected void doDraw(Canvas canvas) {
 		
 		if(canvas == null) return;
-
-		//if(mBackgroundImage != null) canvas.drawBitmap(mBackgroundImage, 0, 0, null);
 
 	}
 	
@@ -189,20 +185,6 @@ public abstract class GameThread extends Thread {
 		//Override to do something
 	}
 
-	//The Accellerometer has changed
-	@SuppressWarnings("deprecation")
-	public void onSensorChanged(SensorEvent event) {
-		synchronized (mSurfaceHolder) {
-			if (event.sensor.getType() == Sensor.TYPE_ORIENTATION) {
-				actionWhenPhoneMoved(event.values[2],event.values[1], event.values[0]);
-			}
-		}
-	}
-	
-	protected void actionWhenPhoneMoved(float xDirection, float yDirection, float zDirection) {
-		//Override to do something
-	}
-	
 	/*
 	 * Game states
 	 */

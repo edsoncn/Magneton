@@ -63,21 +63,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
 		});
 
-		this.sensorAccelerometer = new SensorEventListener() {
-
-			public void onAccuracyChanged(Sensor arg0, int arg1) {
-				// not needed
-			}
-
-			public void onSensorChanged(SensorEvent event) {
-				if(thread!=null) {
-					if (thread.isAlive()) {
-						thread.onSensorChanged(event);
-					}
-				}
-			}
-		};
-
 		setClickable(true);
 		setFocusable(true);
 	}

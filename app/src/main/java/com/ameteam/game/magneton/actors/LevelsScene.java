@@ -55,13 +55,13 @@ public class LevelsScene extends Scene {
 
         if(buttonEasy.validateInside(x, y)){
             getMagnetonGame().setLevel(MagnetonGame.LEVEL_EASY);
-            getMagnetonGame().changeState(MagnetonGame.STATE_RUNNING);
+            getMagnetonGame().changeState(MagnetonGame.STATE_GAME_PLAY);
         }else if(buttonMedium.validateInside(x, y)){
             getMagnetonGame().setLevel(MagnetonGame.LEVEL_MEDIUM);
-            getMagnetonGame().changeState(MagnetonGame.STATE_RUNNING);
+            getMagnetonGame().changeState(MagnetonGame.STATE_GAME_PLAY);
         }else if(buttonHard.validateInside(x, y)){
             getMagnetonGame().setLevel(MagnetonGame.LEVEL_HARD);
-            getMagnetonGame().changeState(MagnetonGame.STATE_RUNNING);
+            getMagnetonGame().changeState(MagnetonGame.STATE_GAME_PLAY);
         }
     }
 

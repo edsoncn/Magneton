@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.util.Log;
 
 import com.ameteam.game.magneton.MagnetonGame;
+import com.ameteam.game.magneton.ai.GameRules;
 
 /**
  * Created by edson on 5/03/2016.
@@ -48,11 +49,11 @@ public class SelectScene extends Scene {
     public void actionOnTouch(float x, float y) {
         Log.i("SelectScene", "Touch: x=" + x + ", y=" + y);
         if(button6x6.validateInside(x, y)){
-            getMagnetonGame().setDimension(MagnetonGame.DIMENSION_6x6);
-            getMagnetonGame().changeState(MagnetonGame.STATE_LEVELS);
+            getMagnetonGame().setDimension(GameRules.DIMENSION_6x6);
+            getMagnetonGame().changeState(MagnetonGame.STATE_GAME_LEVELS);
         }else if(button8x8.validateInside(x, y)){
-            getMagnetonGame().setDimension(MagnetonGame.DIMENSION_8x8);
-            getMagnetonGame().changeState(MagnetonGame.STATE_LEVELS);
+            getMagnetonGame().setDimension(GameRules.DIMENSION_8x8);
+            getMagnetonGame().changeState(MagnetonGame.STATE_GAME_LEVELS);
         }
     }
 
