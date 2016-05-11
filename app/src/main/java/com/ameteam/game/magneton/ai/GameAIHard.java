@@ -13,12 +13,10 @@ public class GameAIHard extends GameAI {
     private static final float PORC_FOR_DEPTH_1 = 0.85f;
     private static final float PORC_FOR_DEPTH_2 = 0.56f;
 
-    private ObjHeuMaps objHeuMaps;
     public static final int MAX_DEPTH = 3;
 
     public GameAIHard(GameRules rules) {
         super(rules);
-        objHeuMaps = new ObjHeuMaps(MAX_DEPTH);
     }
 
     @Override
@@ -50,16 +48,4 @@ public class GameAIHard extends GameAI {
         return gamePosition;
     }
 
-    public class ObjHeuMaps{
-
-        public Map<String, int[][]>[] maps;
-
-        public ObjHeuMaps(int depth){
-            maps = new Map[depth];
-            for(int i = 0; i < depth; i++){
-                maps[i] = new HashMap<>();
-            }
-        }
-
-    }
 }
