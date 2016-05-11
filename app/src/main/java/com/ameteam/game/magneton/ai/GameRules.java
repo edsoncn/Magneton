@@ -273,16 +273,18 @@ public class GameRules {
                     /* 7 */{-1, 1, 0, 0, 0, 0, 0, 0},
                 }
         );
-        gameState.setRestPiecesMachine(6);
-        gameState.setRestPiecesPlayer(5);
+        gameState.setRestPiecesMachine(14);
+        gameState.setRestPiecesPlayer(13);
 
         System.out.println(gameState);
 
         GameAI gameAI = new GameAIHard(gameRules);
         gameAI.setGameState(gameState);
         GamePosition gamePosition = gameAI.aiAlgorithm();
+        System.out.println(gameState);
         gameState.putPiece(gamePosition.getPositionY(), gamePosition.getPositionX(), GameState.TURN_MACHINE);
 
+        System.out.println("px=" + gamePosition.getPositionX() + ", py=" + gamePosition.getPositionY());
         System.out.println(gameState);
 
         //System.out.println("Hash="+GameRules.hashKeyForMatrix(8, gameState.getMatrix()));
