@@ -57,37 +57,34 @@ public class GameState {
 
     public static void putPiece(int dimension, int[][] matrix, int pi, int pj, int turn){
         matrix[pi][pj] = turn;
+        int di, dj, ni, nj;
         for(int k = 0; k < Constants.DIRS_X.length; k++) {
-            int di = Constants.DIRS_Y[k];
-            int dj = Constants.DIRS_X[k];
-            int ni = pi + di;
-            int nj = pj + dj;
-            boolean found = false;
+            di = Constants.DIRS_Y[k];
+            dj = Constants.DIRS_X[k];
+            ni = pi + di;
+            nj = pj + dj;
             while(0 <= ni && ni < dimension && 0 <= nj && nj < dimension){
                 if(matrix[ni][nj] != GameState.SQUARE_NOTHING){
-                    found = true;
+                    if(turn != matrix[ni][nj]){
+                        matrix[ni][nj] = SQUARE_NOTHING;
+                        matrix[pi + di][pj + dj] = turn * -1;
+                    }else{
+                        matrix[ni][nj] = SQUARE_NOTHING;
+                        ni += di;
+                        nj += dj;
+                        while(0 <= ni && ni < dimension && 0 <= nj && nj < dimension){
+                            if(matrix[ni][nj] != GameState.SQUARE_NOTHING){
+                                break;
+                            }
+                            ni += di;
+                            nj += dj;
+                        }
+                        matrix[ni - di][nj - dj] = turn;
+                    }
                     break;
                 }
                 ni += di;
                 nj += dj;
-            }
-            if(found){
-                if(turn != matrix[ni][nj]){
-                    matrix[ni][nj] = SQUARE_NOTHING;
-                    matrix[pi + di][pj + dj] = turn * -1;
-                }else{
-                    matrix[ni][nj] = SQUARE_NOTHING;
-                    ni += di;
-                    nj += dj;
-                    while(0 <= ni && ni < dimension && 0 <= nj && nj < dimension){
-                        if(matrix[ni][nj] != GameState.SQUARE_NOTHING){
-                            break;
-                        }
-                        ni += di;
-                        nj += dj;
-                    }
-                    matrix[ni - di][nj - dj] = turn;
-                }
             }
         }
     }
