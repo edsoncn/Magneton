@@ -1,5 +1,7 @@
 package com.ameteam.game.magneton.ai;
 
+import android.util.Log;
+
 /**
  * Created by edson on 27/03/2016.
  */
@@ -11,6 +13,7 @@ public class GameAIMedium extends GameAI {
 
     @Override
     public GamePosition aiAlgorithm() {
-        return GameAIAlgorithms.random(gameState);
+        Log.i("GameAIEasy", " - bestBetter");
+        return GameAIAlgorithms.bestBetter(gameState);
     }
 }

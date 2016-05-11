@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.util.Log;
 
 import com.ameteam.game.magneton.MagnetonGame;
+import com.ameteam.game.magneton.R;
 
 /**
  * Created by edson on 5/03/2016.
@@ -19,13 +20,13 @@ public class LevelsScene extends Scene {
     public LevelsScene(MagnetonGame magnetonGame){
         super(magnetonGame);
 
-        buttonEasy = new Button(this, "Fácil");
+        buttonEasy = new Button(this, getResources().getString(R.string.lvl_scn_easy));
         buttonEasy.init();
 
-        buttonMedium = new Button(this, "Intermedio");
+        buttonMedium = new Button(this, getResources().getString(R.string.lvl_scn_medium));
         buttonMedium.init();
 
-        buttonHard = new Button(this, "Difícil");
+        buttonHard = new Button(this, getResources().getString(R.string.lvl_scn_hard));
         buttonHard.init();
     }
 
@@ -35,7 +36,7 @@ public class LevelsScene extends Scene {
 
         //Scene
         Paint paintScene = new Paint();
-        paintScene.setColor(Color.parseColor("#616161"));
+        paintScene.setColor(getResources().getColor(R.color.lvl_scn_background));
         paintScene.setStyle(Paint.Style.FILL);
         canvas.drawRect(x, y, x + getWidth(), y + getHeight(), paintScene);
 
@@ -94,6 +95,12 @@ public class LevelsScene extends Scene {
         buttonHard.setHeight(buttonHard.getWidth() * 0.32f);
         buttonHard.setPosition(getX() + (getWidth() - buttonHard.getWidth()) / 2, getY() + getHeight() / 2 + buttonHard.getHeight() * 0.75f);
         buttonHard.resize();
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        getMagnetonGame().setStateGame(MagnetonGame.STATE_GAME_SELECT);
+        return false;
     }
 
 }

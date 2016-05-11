@@ -1,6 +1,7 @@
 package com.ameteam.game.magneton.actors;
 
 import android.graphics.Canvas;
+import android.graphics.RectF;
 
 /**
  * Created by edson on 2/03/2016.
@@ -58,6 +59,12 @@ public abstract class Actor {
     public boolean validateInside(float x ,float y){
         return y>this.y && y<this.y+getHeight()
                 && x>this.x && x<this.x+getWidth();
+    }
+
+    public RectF getRectF(){
+        RectF rect = new RectF();
+        rect.set(x, y, x + width, y + height);
+        return rect;
     }
 
     public float getWidth() {

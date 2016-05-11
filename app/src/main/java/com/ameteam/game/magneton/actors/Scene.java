@@ -1,5 +1,7 @@
 package com.ameteam.game.magneton.actors;
 
+import android.content.res.Resources;
+
 import com.ameteam.game.magneton.MagnetonGame;
 
 /**
@@ -14,7 +16,13 @@ public abstract class Scene extends Actor{
         this.magnetonGame = magnetonGame;
     }
 
+    public Resources getResources(){
+        return magnetonGame.getmGameView().getResources();
+    }
+
     public abstract void resize(int width, int height);
+
+    public abstract boolean onBackPressed();
 
     public MagnetonGame getMagnetonGame() {
         return magnetonGame;

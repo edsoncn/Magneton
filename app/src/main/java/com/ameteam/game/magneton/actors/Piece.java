@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 
+import com.ameteam.game.magneton.R;
 import com.ameteam.game.magneton.util.Constants;
 import com.ameteam.game.magneton.util.Utils;
 
@@ -94,9 +95,9 @@ public class Piece extends Character{
         }
 
         if(this.getType() == RED){
-            paint.setColor(Color.parseColor("#ff5252"));
+            paint.setColor(getScene().getResources().getColor(R.color.piece_fill_red));
         }else if(this.getType() == BLUE){
-            paint.setColor(Color.parseColor("#448aff"));
+            paint.setColor(getScene().getResources().getColor(R.color.piece_fill_blue));
         }
         rect.set(x + getWidth() * 0.1f, y + getHeight() * 0.1f, x + getWidth() * 0.9f, y + getHeight() * 0.9f);
         canvas.drawOval(rect, paint);

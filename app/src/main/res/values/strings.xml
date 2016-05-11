@@ -10,4 +10,21 @@
     <string name="menu_stop">Stop</string>
     <string name="menu_resume">Resume</string>
     <string name="message_stopped">Stopped</string>
+
+    <!-- Select Scene -->
+    <string name="sel_scn_6x6">6x6</string>
+    <string name="sel_scn_8x8">8x8</string>
+
+    <!-- Levels Scene -->
+    <string name="lvl_scn_easy">Easy</string>
+    <string name="lvl_scn_medium">Medium</string>
+    <string name="lvl_scn_hard">Hard</string>
+
+    <!-- Play Scene -->
+    <string name="ply_scn_win_player">Win Player</string>
+    <string name="ply_scn_win_machine">Win Machine</string>
+    <string name="ply_scn_draw">Draw</string>
+    <string name="ply_scn_turn_player">You</string>
+    <string name="ply_scn_turn_machine">Machine</string>
+
 </resources>

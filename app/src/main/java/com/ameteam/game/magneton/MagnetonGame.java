@@ -1,6 +1,8 @@
 package com.ameteam.game.magneton;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 
 import com.ameteam.game.magneton.actors.LevelsScene;
 import com.ameteam.game.magneton.actors.PlayScene;
@@ -34,7 +36,7 @@ public class MagnetonGame extends GameThread {
         setLevel(LEVEL_EASY);
     }
 
-    private void setStateGame(int state){
+    public synchronized void setStateGame(int state){
         this.stateGame = state;
     }
 
@@ -43,8 +45,7 @@ public class MagnetonGame extends GameThread {
             case STATE_GAME_LEVELS:
                 switch (state){
                     case STATE_GAME_PLAY:
-                        playScene.getBoard().init();
-                        playScene.getBoard().resize();
+                        playScene.initGame();
                         break;
                 }
                 break;
@@ -54,6 +55,12 @@ public class MagnetonGame extends GameThread {
 
     @Override
     protected void doDraw(Canvas canvas) {
+
+        //Background
+        Paint paint = new Paint();
+        paint.setColor(getmGameView().getResources().getColor(R.color.background));
+        canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), paint);
+
         switch (stateGame){
             case STATE_GAME_SELECT:
                 selectScene.doDraw(canvas);
@@ -146,6 +153,19 @@ public class MagnetonGame extends GameThread {
                 levelsScene.actionOnTouchMove(x, y);
                 break;
         }
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        switch (stateGame) {
+            case STATE_GAME_SELECT:
+                return selectScene.onBackPressed();
+            case STATE_GAME_PLAY:
+                return playScene.onBackPressed();
+            case STATE_GAME_LEVELS:
+                return levelsScene.onBackPressed();
+        }
+        return true;
     }
 
     public int getDimension() {

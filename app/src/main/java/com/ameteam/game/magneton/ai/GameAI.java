@@ -28,7 +28,9 @@ public class GameAI{
     }
 
     public void start() {
-        new GameAITask().execute(this);
+        GameAITask gameAITask = new GameAITask();
+        gameAITask.setGameAI(this);
+        new Thread(gameAITask).start();
     }
 
     public GameRules getRules() {
@@ -63,11 +65,11 @@ public class GameAI{
         this.nextPlay = nextPlay;
     }
 
-    public class GameAITask extends AsyncTask<GameAI, GameAI, GameAI> {
+    public class GameAITask implements Runnable {
 
-        @Override
-        protected GameAI doInBackground(GameAI... params) {
-            GameAI gameAI = params[0];
+        private GameAI gameAI;
+
+        protected GameAI doInBackground() {
             long lastTime = System.currentTimeMillis();
             GamePosition gamePosition = gameAI.getNextPlayMachine();
             if(gamePosition != null) {
@@ -77,19 +79,18 @@ public class GameAI{
                     now = System.currentTimeMillis();
                 }
                 lastTime = System.currentTimeMillis();
-                publishProgress(gameAI);
+                onProgressUpdate();
                 now = System.currentTimeMillis();
                 while (now - lastTime < 350) {
                     Thread.yield();
                     now = System.currentTimeMillis();
                 }
+                onPostExecute();
             }
             return gameAI;
         }
 
-        @Override
-        protected void onProgressUpdate(GameAI... progress) {
-            GameAI gameAI = progress[0];
+        protected void onProgressUpdate() {
             GamePosition gamePosition = gameAI.getNextPlay();
             if(gamePosition != null){
                 float x = gameAI.getBoard().getCenterXByPositionX(gamePosition.getPositionX());
@@ -99,11 +100,19 @@ public class GameAI{
             }
         }
 
-        @Override
-        protected void onPostExecute(GameAI gameAI) {
+        protected void onPostExecute() {
             if(gameAI.getNextPlay() != null){
                 gameAI.getBoard().putPiece(gameAI.getNextPlay().getPositionX(), gameAI.getNextPlay().getPositionY(), gameAI.getGameState().getTurn());
             }
+        }
+
+        @Override
+        public void run() {
+            doInBackground();
+        }
+
+        public void setGameAI(GameAI gameAI) {
+            this.gameAI = gameAI;
         }
     }
 }

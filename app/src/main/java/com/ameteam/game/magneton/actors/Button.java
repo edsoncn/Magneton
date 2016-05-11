@@ -1,13 +1,10 @@
 package com.ameteam.game.magneton.actors;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.util.Log;
-
-import com.ameteam.game.magneton.MagnetonGame;
+import com.ameteam.game.magneton.R;
 
 /**
  * Created by edson on 9/03/2016.
@@ -28,23 +25,23 @@ public class Button extends Character{
     @Override
     public void doDraw(Canvas canvas) {
         Paint paint = new Paint();
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.parseColor("#212121"));
-        paint.setStrokeWidth(getHeight() * 0.0625f);
 
         //Drawing the box
         final RectF rect = new RectF();
         rect.set(x, y, x + width, y + height);
+
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(getScene().getResources().getColor(R.color.btn_fill));
         canvas.drawRoundRect(rect, getHeight() * 0.25f, getHeight() * 0.25f, paint);
 
-        paint.setTextAlign(Paint.Align.CENTER);
-        paint.setTextSize(getHeight() * 0.6f);
-        Rect textBounds = new Rect();
-        paint.getTextBounds(text, 0, text.length(), textBounds);
-        paint.setStyle(Paint.Style.FILL);
+        int borderColor = getScene().getResources().getColor(R.color.btn_border);
 
-        //Drawing the text
-        canvas.drawText(text, getX() + getWidth()/2, getY() + getHeight()/2 - textBounds.exactCenterY(), paint);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(borderColor);
+        paint.setStrokeWidth(getHeight() * 0.0625f);
+        canvas.drawRoundRect(rect, getHeight() * 0.25f, getHeight() * 0.25f, paint);
+
+        com.ameteam.graphics.Rect.drawRectWithText(canvas, text, rect, borderColor, Paint.Align.CENTER, 0.6f);
     }
 
     @Override

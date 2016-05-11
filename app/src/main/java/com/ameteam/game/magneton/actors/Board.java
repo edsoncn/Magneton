@@ -7,7 +7,9 @@ import android.graphics.RectF;
 import android.util.Log;
 
 import com.ameteam.game.magneton.MagnetonGame;
+import com.ameteam.game.magneton.R;
 import com.ameteam.game.magneton.ai.GameState;
+import com.ameteam.game.magneton.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +31,8 @@ public class Board extends Character {
 
     //Effect circle on move
     private float movX, movY;
-    public final float K = 0.00075f; // Gravitational constant
-    public final float FF = 0.00015f; // Frictional force
+    public final float K = 0.000775f; // Gravitational constant
+    public final float FF = 0.000175f; // Frictional force
 
     public Board(Scene scene, int dimension) {
         super(scene);
@@ -72,11 +74,11 @@ public class Board extends Character {
     @Override
     public void doDraw(Canvas canvas) {
         Paint paint = new Paint();
-        paint.setColor(Color.parseColor("#616161"));
+        paint.setColor(getScene().getResources().getColor(R.color.board_square_black));
         canvas.drawRect(x, y, x + width, y + height, paint);
 
         Paint paintBlack = new Paint();
-        paintBlack.setColor(Color.parseColor("#9e9e9e"));
+        paintBlack.setColor(getScene().getResources().getColor(R.color.board_square_white));
         int total = getDimension();
         float lado = width / total;
         for (int i = 0; i < total; i++) {
@@ -108,7 +110,7 @@ public class Board extends Character {
                         float squareX = getX() + posX * getWidth() / getDimension();
                         float squareY = getY() + posY * getHeight() / getDimension();
 
-                        paint.setColor(Color.parseColor("#FFFFFF"));
+                        paint.setColor(getScene().getResources().getColor(R.color.board_square_border));
                         paint.setStyle(Paint.Style.STROKE);
                         paint.setStrokeWidth((getWidth() / getDimension()) * 0.075f);
                         paint.setStrokeCap(Paint.Cap.ROUND);
@@ -117,9 +119,9 @@ public class Board extends Character {
                     }
 
                     paint.setStyle(Paint.Style.FILL);
-                    paint.setColor(Color.parseColor("#40000000"));
-                    float movW = (float) ((getWidth() / getDimension()) * 1.125);
-                    float movH = (float) ((getHeight() / getDimension()) * 1.125);
+                    paint.setColor(getScene().getResources().getColor(R.color.board_square_shadow));
+                    float movW = (getWidth() / getDimension()) * (1 + .414214f * 0.75f);
+                    float movH = (getHeight() / getDimension()) * (1 + .414214f * 0.75f);
 
                     RectF rect = new RectF();
                     rect.set(movX - movW / 2, movY - movH / 2, movX + movW / 2, movY + movH / 2);
@@ -181,7 +183,7 @@ public class Board extends Character {
                         p.setCenterY(p.getCenterY() + p.getVy());
                         isMovingPieces = true;
                     }else{
-                        Log.i("Board", "dx="+dx+", dy="+dy+", vx="+p.getVx()+", vy="+p.getVy());
+                        /* Log.i("Board", "dx="+dx+", dy="+dy+", vx="+p.getVx()+", vy="+p.getVy()); */
                         p.setM(0);
                         p.setPositionX(p.getStopPosX());
                         p.setPositionY(p.getStopPosY());
@@ -237,16 +239,13 @@ public class Board extends Character {
         return piece;
     }
 
-    private final int[] DIRS_X = {-1, 0, 1,-1, 1,-1, 0, 1};
-    private final int[] DIRS_Y = {-1,-1,-1, 0, 0, 1, 1, 1};
-
     public void initPiecesForMagneticEffect(){
         for (Piece p : lstPieces) {
             p.resetMoving();
         }
-        for(int i = 0; i < DIRS_X.length; i++){
-            int dx = DIRS_X[i];
-            int dy = DIRS_Y[i];
+        for(int i = 0; i < Constants.DIRS_X.length; i++){
+            int dx = Constants.DIRS_X[i];
+            int dy = Constants.DIRS_Y[i];
             //Log.i("Board", "DIR dx=" + dx + ", dy=" + dy);
             Piece foundPiece = null;
             int posX = lastPiece.getPositionX() + dx;
@@ -315,9 +314,29 @@ public class Board extends Character {
             }
         }
         for(Piece p : lstPieces){
-            matrix[p.getPositionX()][p.getPositionY()] = p.getType() == Piece.RED ? GameState.SQUARE_PLAYER : GameState.SQUARE_MACHINE;
+            matrix[p.getPositionY()][p.getPositionX()] = p.getType() == Piece.RED ? GameState.SQUARE_PLAYER : GameState.SQUARE_MACHINE;
         }
         return matrix;
+    }
+
+    public int getCountPiecesPlayer(){
+        int count = 0;
+        for(Piece p : lstPieces){
+            if(p.getType() == Piece.RED){
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public int getCountPiecesMachine(){
+        int count = 0;
+        for(Piece p : lstPieces){
+            if(p.getType() == Piece.BLUE){
+                count++;
+            }
+        }
+        return count;
     }
 
     public int getPositionXByX(float x){

@@ -28,7 +28,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 		holder.addCallback(this);
 
 	}
-	
+
 	//Used to release any resources.
 	public void cleanup() {
 		this.thread.setRunning(false);
@@ -79,8 +79,14 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	@Override
 	public void onWindowFocusChanged(boolean hasWindowFocus) {
 		if(thread!=null) {
-			if (!hasWindowFocus)
-				thread.pause();
+			Log.i("GameView", "onWindowFocusChanged");
+			if (!hasWindowFocus) {
+				if(thread.getMode() != GameThread.STATE_FORCE_PAUSE) {
+					thread.forcePause();
+				}
+			}else if(thread.getMode() == GameThread.STATE_FORCE_PAUSE){
+				thread.unForcePause();
+			}
 		}
 	}
 
@@ -101,12 +107,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 				if(thread.getState() == Thread.State.TERMINATED){
 					//Start a new thread
 					//Should be this to update screen with old game: new GameThread(this, thread);
-					//The method should set all fields in new thread to the value of old thread's fields 
+					//The method should set all fields in new thread to the value of old thread's fields
 					thread = new MagnetonGame(this);
 					thread.setRunning(true);
 					thread.doStart();
 					thread.start();
 				}
+			}
+			Log.i("GameView", "mode: " + thread.getMode());
+			if(thread.getMode() == GameThread.STATE_FORCE_PAUSE){
+				thread.unForcePause();
 			}
 		}
 	}
@@ -114,6 +124,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	//Always called once after surfaceCreated. Tell the GameThread the actual size
 	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 		if(thread!=null) {
+			Log.i("GameView", "surfaceChanged");
 			thread.setSurfaceSize(width, height);			
 		}
 	}
@@ -123,41 +134,14 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 	 * Remember this doesn't need to happen when app is paused on even stopped.
 	 */
 	public void surfaceDestroyed(SurfaceHolder arg0) {
-		
-		boolean retry = true;
+		Log.i("GameView: ", "surfaceDestroyed");
 		if(thread!=null) {
-			thread.setRunning(false);
-		}
-		
-		//join the thread with this thread
-		while (retry) {
-			try {
-				if(thread!=null) {
-					thread.join();
-				}
-				retry = false;
-			} 
-			catch (InterruptedException e) {
-				//naugthy, ought to do something...
+			if (thread.getMode() != GameThread.STATE_FORCE_PAUSE) {
+				thread.forcePause();
 			}
 		}
-	}
-	
-	/*
-	 * Accelerometer
-	 */
 
-	public void startSensor(SensorManager sm) {
-		sm.registerListener(this.sensorAccelerometer, 
-				sm.getDefaultSensor(Sensor.TYPE_ORIENTATION),	
-				SensorManager.SENSOR_DELAY_GAME);
 	}
-	
-	public void removeSensor(SensorManager sm) {
-		sm.unregisterListener(this.sensorAccelerometer);
-		this.sensorAccelerometer = null;
-	}
-	
 }
 
 // This file is part of the course "Begin Programming: Build your first mobile game" from futurelearn.com

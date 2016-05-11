@@ -23,6 +23,10 @@ public abstract class GameThread extends Thread {
 	public static final int STATE_READY = 3;
 	public static final int STATE_RUNNING = 4;
 	public static final int STATE_WIN = 5;
+	public static final int STATE_FORCE_PAUSE = 6;
+
+	//State after force puase
+	protected int mModeAux;
 
 	//Control variable for the mode of the game (e.g. STATE_WIN)
 	protected int mMode = 1;
@@ -37,7 +41,7 @@ public abstract class GameThread extends Thread {
 	private Context mContext;
 	
 	//The view
-	public GameView mGameView;
+	private GameView mGameView;
 
 	//We might want to extend this call - therefore protected
 	protected int mCanvasWidth = 1;
@@ -82,11 +86,8 @@ public abstract class GameThread extends Thread {
 	//Starting up the game
 	public void doStart() {
 		synchronized(mSurfaceHolder) {
-			
 			setupBeginning();
-			
 			mLastTime = System.currentTimeMillis() + 100;
-
 			setScore(0);
 		}
 	}
@@ -96,21 +97,24 @@ public abstract class GameThread extends Thread {
 	public void run() {
 		Canvas canvasRun;
 		while (mRun) {
-			canvasRun = null;
-			try {
-				canvasRun = mSurfaceHolder.lockCanvas(null);
-				synchronized (mSurfaceHolder) {
-					if (mMode == STATE_RUNNING) {
-						updatePhysics();
+			if(mMode != STATE_FORCE_PAUSE){
+				canvasRun = null;
+				try {
+					canvasRun = mSurfaceHolder.lockCanvas(null);
+					synchronized (mSurfaceHolder) {
+						if (mMode == STATE_RUNNING) {
+							updatePhysics();
+						}
+						doDraw(canvasRun);
 					}
-					doDraw(canvasRun);
+				} finally {
+					if (canvasRun != null) {
+						if (mSurfaceHolder != null)
+							mSurfaceHolder.unlockCanvasAndPost(canvasRun);
+					}
 				}
-			} 
-			finally {
-				if (canvasRun != null) {
-					if(mSurfaceHolder != null)
-						mSurfaceHolder.unlockCanvasAndPost(canvasRun);
-				}
+			}else{
+				Thread.yield();
 			}
 		}
 	}
@@ -185,6 +189,8 @@ public abstract class GameThread extends Thread {
 		//Override to do something
 	}
 
+	public abstract boolean onBackPressed();
+
 	/*
 	 * Game states
 	 */
@@ -193,14 +199,29 @@ public abstract class GameThread extends Thread {
 			if (mMode == STATE_RUNNING) setState(STATE_PAUSE);
 		}
 	}
-	
+
 	public void unpause() {
 		// Move the real time clock up to now
 		synchronized (mSurfaceHolder) {
 			mLastTime = System.currentTimeMillis();
 		}
 		setState(STATE_RUNNING);
-	}	
+	}
+
+	public void forcePause(){
+		mModeAux = mMode;
+		synchronized (mSurfaceHolder) {
+			if (mMode != STATE_FORCE_PAUSE) setState(STATE_FORCE_PAUSE);
+		}
+	}
+
+	public void unForcePause() {
+		// Move the real time clock up to now
+		synchronized (mSurfaceHolder) {
+			mLastTime = System.currentTimeMillis();
+		}
+		setState(mModeAux);
+	}
 
 	//Send messages to View/Activity thread
 	public void setState(int mode) {
@@ -275,7 +296,10 @@ public abstract class GameThread extends Thread {
 	protected CharSequence getScoreString() {
 		return Long.toString(Math.round(this.score));
 	}
-	
+
+	public GameView getmGameView() {
+		return mGameView;
+	}
 }
 
 // This file is part of the course "Begin Programming: Build your first mobile game" from futurelearn.com

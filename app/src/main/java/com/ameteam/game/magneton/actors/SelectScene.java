@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.util.Log;
 
 import com.ameteam.game.magneton.MagnetonGame;
+import com.ameteam.game.magneton.R;
 import com.ameteam.game.magneton.ai.GameRules;
 
 /**
@@ -19,10 +20,10 @@ public class SelectScene extends Scene {
     public SelectScene(MagnetonGame magnetonGame){
         super(magnetonGame);
 
-        button6x6 = new Button(this, "6 x 6");
+        button6x6 = new Button(this, getResources().getString(R.string.sel_scn_6x6));
         button6x6.init();
 
-        button8x8 = new Button(this, "8 x 8");
+        button8x8 = new Button(this, getResources().getString(R.string.sel_scn_8x8));
         button8x8.init();
     }
 
@@ -32,7 +33,7 @@ public class SelectScene extends Scene {
 
         //Scene
         Paint paintScene = new Paint();
-        paintScene.setColor(Color.parseColor("#616161"));
+        paintScene.setColor(getResources().getColor(R.color.sel_scn_background));
         paintScene.setStyle(Paint.Style.FILL);
         canvas.drawRect(x, y, x + getWidth(), y + getHeight(), paintScene);
 
@@ -81,6 +82,11 @@ public class SelectScene extends Scene {
         button8x8.setHeight(button8x8.getWidth() * 0.32f);
         button8x8.setPosition(getX() + (getWidth() - button8x8.getWidth()) / 2, getY() + getHeight() / 2 + button8x8.getHeight() * 0.25f);
         button8x8.resize();
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        return true;
     }
 
 }
