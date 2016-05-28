@@ -9,7 +9,7 @@ public class Constants {
     public static final int[] DIRS_Y = {-1,-1,-1, 0, 0, 1, 1, 1};
 
     public static final int RGB_EFFECT_MAX = 96;
-    public static final int INFINITE = 999999999;
+    public static final int INFINITE = 999999;
     public static final int PRIME_NUMBER = 97;
 
     public static final char[] CHARACTERS = new char[]{

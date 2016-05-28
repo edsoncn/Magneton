@@ -73,13 +73,16 @@ public class SelectScene extends Scene {
         setDimensions(width, height);
         setPosition(0, 0);
 
-        button6x6.setWidth(getWidth() * 0.75f);
-        button6x6.setHeight(button6x6.getWidth() * 0.32f);
+        float pW = 0.72f;
+        float pH = 0.25f;
+
+        button6x6.setWidth(getWidth() *pW);
+        button6x6.setHeight(button6x6.getWidth() * pH);
         button6x6.setPosition(getX() + (getWidth() - button6x6.getWidth()) / 2, getY() + getHeight() / 2 - button6x6.getHeight() * 1.25f);
         button6x6.resize();
 
-        button8x8.setWidth(getWidth() * 0.75f);
-        button8x8.setHeight(button8x8.getWidth() * 0.32f);
+        button8x8.setWidth(getWidth() * pW);
+        button8x8.setHeight(button8x8.getWidth() * pH);
         button8x8.setPosition(getX() + (getWidth() - button8x8.getWidth()) / 2, getY() + getHeight() / 2 + button8x8.getHeight() * 0.25f);
         button8x8.resize();
     }

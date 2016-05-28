@@ -23,12 +23,14 @@ public class PlayScene extends Scene {
     private Board board;
     private GameRules gameRules;
     private GameAI gameAI;
+    private boolean is2Players;
 
     private int state; //GameState: TURN_PLAYER, TURN_MACHINE, TURN_WAITING
 
     public PlayScene(MagnetonGame magnetonGame){
         super(magnetonGame);
         board = new Board(this, GameRules.DIMENSION_8x8);
+        state = 0;
     }
 
     @Override
@@ -43,6 +45,7 @@ public class PlayScene extends Scene {
         board.init();
         board.resize();
         gameRules = new GameRules(magnetonGame.getDimension());
+        is2Players = magnetonGame.getLevel() == MagnetonGame.LEVEL_2_PLAYERS;
 
         switch (magnetonGame.getLevel()){
             case MagnetonGame.LEVEL_EASY:
@@ -54,11 +57,16 @@ public class PlayScene extends Scene {
             case MagnetonGame.LEVEL_HARD:
                 gameAI = new GameAIHard(gameRules);
                 break;
+            case MagnetonGame.LEVEL_2_PLAYERS:
+                gameAI = null;
+                break;
             default:
                 gameAI = new GameAIEasy(gameRules);
                 break;
         }
-        gameAI.setBoard(board);
+        if(gameAI != null) {
+            gameAI.setBoard(board);
+        }
     }
 
     @Override
@@ -85,7 +93,18 @@ public class PlayScene extends Scene {
         }
 
         drawTurnSection(canvas, getResources().getString(R.string.ply_scn_turn_player), GameState.TURN_PLAYER);
-        drawTurnSection(canvas, getResources().getString(R.string.ply_scn_turn_machine), GameState.TURN_MACHINE);
+        if(is2Players) {
+            canvas.scale(-1, -1);
+            canvas.translate(-(2 * x + board.getWidth()), -(2 * y + board.getHeight() / 8));
+        }
+        drawTurnSection(canvas,
+                !is2Players ?   getResources().getString(R.string.ply_scn_turn_machine) :
+                                getResources().getString(R.string.ply_scn_turn_player)
+                , GameState.TURN_MACHINE);
+        if(is2Players) {
+            canvas.translate(2 * x + board.getWidth(), 2 * y + board.getHeight() / 8);
+            canvas.scale(-1, -1);
+        }
 
     }
 
@@ -103,21 +122,24 @@ public class PlayScene extends Scene {
 
         Log.i("PlayScene", "Turn: " + state);
 
-        GameState gameState = new GameState(gameAI.getRules());
+        GameState gameState = new GameState(gameRules);
         gameState.setMatrix(board.getMatrix());
         gameState.setTurn(state);
-        gameState.setRestPiecesPlayer(gameAI.getRules().getMaxPieces() - board.getCountPiecesPlayer());
-        gameState.setRestPiecesMachine(gameAI.getRules().getMaxPieces() - board.getCountPiecesMachine());
+        gameState.setRestPiecesPlayer(gameRules.getMaxPieces() - board.getCountPiecesPlayer());
+        gameState.setRestPiecesMachine(gameRules.getMaxPieces() - board.getCountPiecesMachine());
 
         validateGameState(gameState);
 
-        if(state == GameState.TURN_MACHINE){
+        /**
+         * Change for preActionMachine
+         */
+        /**if(state == GameState.TURN_MACHINE && !is2Players){
             gamaAIAction(gameState);
-        }
+        }**/
     }
 
     private void validateGameState(GameState gameState){
-        int objectiveFunction = gameAI.getRules().objetiveFunction(gameState);
+        int objectiveFunction = gameRules.objetiveFunction(gameState);
         if(objectiveFunction != GameRules.GAME_WIN_NOBODY){
             switch (objectiveFunction){
                 case GameRules.GAME_WIN_PLAYER:
@@ -132,6 +154,21 @@ public class PlayScene extends Scene {
         }
     }
 
+    public void preActionMachine(int pi, int pj){
+        if(state == GameState.TURN_PLAYER && !is2Players){
+
+            GameState gameState = new GameState(gameRules);
+            int [][] matrix = board.getMatrix();
+            GameState.putPiece(gameRules.getDimension(), matrix, pi, pj, GameState.TURN_PLAYER);
+            gameState.setMatrix(matrix);
+            gameState.setTurn(GameState.TURN_MACHINE);
+            gameState.setRestPiecesPlayer(gameRules.getMaxPieces() - (board.getCountPiecesPlayer() - 1));
+            gameState.setRestPiecesMachine(gameRules.getMaxPieces() - board.getCountPiecesMachine());
+
+            gamaAIAction(gameState);
+        }
+    }
+
     private void gamaAIAction(GameState gameState){
         gameAI.setGameState(gameState);
         gameAI.start();
@@ -139,7 +176,7 @@ public class PlayScene extends Scene {
 
     @Override
     public void actionOnTouch(float x, float y) {
-        if(state == GameState.TURN_PLAYER) {
+        if(state == GameState.TURN_PLAYER || (is2Players && state == GameState.TURN_MACHINE)) {
             if (board.validateInside(x, y)) {
                 switch (board.getState()) {
                     case Board.STATE_WAITING:
@@ -153,7 +190,7 @@ public class PlayScene extends Scene {
 
     @Override
     public void actionOnTouchUp(float x, float y) {
-        if(state == GameState.TURN_PLAYER) {
+        if(state == GameState.TURN_PLAYER || (is2Players && state == GameState.TURN_MACHINE)) {
             if (board.validateInside(x, y)) {
                 switch (board.getState()) {
                     case Board.STATE_PLAYER_MOVING:
@@ -161,6 +198,7 @@ public class PlayScene extends Scene {
                         int posY = board.getPositionYByY(y);
 
                         if (!board.validateIfContainsPiece(posX, posY)) {
+                            preActionMachine(posY, posX);
                             board.putPiece(posX, posY, state);
                         } else {
                             board.initStateWaiting();
@@ -173,7 +211,7 @@ public class PlayScene extends Scene {
 
     @Override
     public void actionOnTouchMove(float x, float y) {
-        if(state == GameState.TURN_PLAYER) {
+        if(state == GameState.TURN_PLAYER || (is2Players && state == GameState.TURN_MACHINE)) {
             switch (board.getState()) {
                 case Board.STATE_PLAYER_MOVING:
                     board.initMoving(x, y);
@@ -190,6 +228,10 @@ public class PlayScene extends Scene {
         setDimensions(width * p, width * p * r);
         setPosition((width - this.width) / 2, (height - this.height) / 2);
 
+    }
+
+    public void resetState(){
+        setState(0);
     }
 
     @Override
@@ -210,9 +252,9 @@ public class PlayScene extends Scene {
         float sectionHeight = board.getHeight() / 8;
         RectF rectF = new RectF();
         if(turn == GameState.TURN_MACHINE) {
-            rectF.set(x, y, x + width, y + sectionHeight);
+            rectF.set(x, y, x + board.getWidth(), y + sectionHeight);
         }else{
-            rectF.set(x, y + height - sectionHeight, x + width, y + height);
+            rectF.set(x, y + height - sectionHeight, x + board.getWidth(), y + height);
         }
 
         Paint paint = new Paint();
@@ -220,7 +262,7 @@ public class PlayScene extends Scene {
         float textProportion;
         if(turn == this.state) {
             paint.setColor(getResources().getColor(R.color.ply_scn_circle_on));
-            padding = sectionHeight * 0.36f;
+            padding = sectionHeight * 0.35f;
             textProportion = 0.48f;
         }else{
             paint.setColor(getResources().getColor(R.color.ply_scn_circle_off));
@@ -231,7 +273,6 @@ public class PlayScene extends Scene {
 
         RectF rectFCircle = new RectF();
         rectFCircle.set(rectF.left + padding, rectF.top + padding, rectF.left + sectionHeight - padding, rectF.bottom - padding);
-
         canvas.drawOval(rectFCircle, paint);
 
         if(turn == this.state) {
@@ -249,15 +290,34 @@ public class PlayScene extends Scene {
             }
         }
 
-
         RectF rectFText = new RectF();
         rectFText.set(rectF.left + sectionHeight, rectF.top, rectF.right, rectF.bottom);
-
         com.ameteam.graphics.Rect.drawRectWithText(canvas, text, rectFText, getResources().getColor(R.color.text_subtitle_light), Paint.Align.LEFT, textProportion);
+
+        int numPieces = gameRules.getMaxPieces() - ( turn == GameState.TURN_MACHINE ? board.getCountPiecesMachine() : board.getCountPiecesPlayer() );
+        rectFText.set(rectF.left + sectionHeight * 7, rectF.top, rectF.right - sectionHeight, rectF.bottom);
+        com.ameteam.graphics.Rect.drawRectWithText(canvas, ("x" + numPieces), rectFText, getResources().getColor(R.color.text_subtitle_light), Paint.Align.LEFT, 0.40f);
+
+        if(turn == GameState.TURN_PLAYER){
+            paint.setColor(getResources().getColor(R.color.piece_fill_red));
+        }else{
+            paint.setColor(getResources().getColor(R.color.piece_fill_blue));
+        }
+        padding = sectionHeight * 0.275f;
+        rectFCircle.set(rectF.left + sectionHeight * 6 + padding * 1.75f, rectF.top + padding, rectFText.right - padding * 0.25f, rectF.bottom - padding);
+        canvas.drawOval(rectFCircle, paint);
 
     }
 
     public Board getBoard() {
         return board;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
     }
 }

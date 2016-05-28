@@ -16,6 +16,7 @@
     <string name="sel_scn_8x8">8x8</string>
 
     <!-- Levels Scene -->
+    <string name="lvl_scn_2_players">2 Players</string>
     <string name="lvl_scn_easy">Easy</string>
     <string name="lvl_scn_medium">Medium</string>
     <string name="lvl_scn_hard">Hard</string>

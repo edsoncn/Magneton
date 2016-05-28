@@ -100,12 +100,14 @@ public class GameRules {
         }
     }
 
-    public int heuristic(GameState state){
+    public Integer heuristic(GameState state){
         return heuristic(dimension, tuple, state.getMatrix());
     }
 
-    public static int heuristic(int dimension, int tuple, int[][] matrix){
+    public static Integer heuristic(int dimension, int tuple, int[][] matrix){
         int suma = 0;
+        int winsPlayer = 0;
+        int winsMachine = 0;
         for(int i = 0; i <= dimension; i++){
             for(int j = 0; j < dimension; j++){
 
@@ -128,6 +130,12 @@ public class GameRules {
             HeurSumsAux.HIJ.finish();
             HeurSumsAux.HJI.finish();
 
+            winsMachine += HeurSumsAux.HI.getWinsMachine()+HeurSumsAux.HJ.getWinsMachine()+
+                    HeurSumsAux.HIJ.getWinsMachine()+HeurSumsAux.HJI.getWinsMachine();
+
+            winsPlayer += HeurSumsAux.HI.getWinsPlayer()+HeurSumsAux.HJ.getWinsPlayer()+
+                    HeurSumsAux.HIJ.getWinsPlayer()+HeurSumsAux.HJI.getWinsPlayer();
+
             suma += HeurSumsAux.HI.getSum();
             suma += HeurSumsAux.HJ.getSum();
             suma += HeurSumsAux.HIJ.getSum();
@@ -138,7 +146,15 @@ public class GameRules {
             HeurSumsAux.HIJ.reset();
             HeurSumsAux.HJI.reset();
         }
-        return suma;
+        if(winsMachine == 0 && winsPlayer == 0) {
+            return suma;
+        }else if(winsMachine == winsPlayer){
+            return null;
+        }else if(winsMachine > winsPlayer){
+            return Constants.INFINITE;
+        }else{
+            return -Constants.INFINITE;
+        }
     }
 
     public static String hashKeyForMatrix(int dimension, int[][] matrix){
@@ -160,7 +176,7 @@ public class GameRules {
         return sb.toString();
     }
 
-    private enum HeurSumsAux{
+    public enum HeurSumsAux{
 
         HI,HJ,HIJ,HJI;
 
@@ -168,6 +184,9 @@ public class GameRules {
         private int aux2;//last piece after difference found
         private float saux;
         private int sum;
+        private int winsPlayer;
+        private int winsMachine;
+        private int tuple;
         private static final int OVERFLOW_PIECE = -11;
         private static final float ADD = 0.25f;
 
@@ -176,6 +195,13 @@ public class GameRules {
             aux2 = OVERFLOW_PIECE;
             saux = 0;
             sum = 0;
+            winsPlayer = 0;
+            winsMachine = 0;
+            tuple = 0;
+        }
+
+        public void init(int tuple){
+            this.tuple = tuple;
         }
 
         public void evaluate(int val){
@@ -184,6 +210,13 @@ public class GameRules {
                 saux += val;
             } else {
                 if(saux != 0){
+                    if(tuple == Math.abs(saux)){
+                        if(saux < 0){
+                            winsPlayer++;
+                        }else{
+                            winsMachine++;
+                        }
+                    }
                     saux += aux * ADD * ((aux2 == 0 ? 1 : 0) + (val == 0 ? 1 : 0));
                     sum += saux * Math.pow(10, (1 + Math.abs(saux))); //heuristic function
                 }
@@ -206,6 +239,17 @@ public class GameRules {
             aux2 = OVERFLOW_PIECE;
             saux = 0;
             sum = 0;
+            winsPlayer = 0;
+            winsMachine = 0;
+        }
+
+
+        public int getWinsPlayer() {
+            return winsPlayer;
+        }
+
+        public int getWinsMachine() {
+            return winsMachine;
         }
     }
 

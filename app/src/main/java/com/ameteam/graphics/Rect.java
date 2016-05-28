@@ -18,7 +18,8 @@ public class Rect {
         paint.getTextBounds(text, 0, text.length(), textBounds);
 
         //Drawing the text
-        canvas.drawText(text, rectF.left + (align.equals(Paint.Align.CENTER) ? rectF.width() / 2 : 0),
+        canvas.drawText(text, rectF.left + (align.equals(Paint.Align.CENTER) ? rectF.width() / 2 :
+                        (align.equals(Paint.Align.RIGHT) ? rectF.width() : 0) ),
                 rectF.top + rectF.height() / 2 - textBounds.exactCenterY(), paint);
     }
 

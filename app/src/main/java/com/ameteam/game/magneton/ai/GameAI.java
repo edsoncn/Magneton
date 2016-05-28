@@ -16,6 +16,11 @@ public class GameAI{
 
     public GameAI(GameRules rules){
         this.rules = rules;
+
+        GameRules.HeurSumsAux.HI.init(rules.getTuple());
+        GameRules.HeurSumsAux.HJ.init(rules.getTuple());
+        GameRules.HeurSumsAux.HIJ.init(rules.getTuple());
+        GameRules.HeurSumsAux.HJI.init(rules.getTuple());
     }
 
     public GamePosition getNextPlayMachine(){
@@ -74,18 +79,23 @@ public class GameAI{
             GamePosition gamePosition = gameAI.getNextPlayMachine();
             if(gamePosition != null) {
                 long now = System.currentTimeMillis();
-                while (now - lastTime < 400) {
+                while (now - lastTime < 400 || GameState.TURN_PLAYER == gameAI.getBoard().getGameState()) {
                     Thread.yield();
                     now = System.currentTimeMillis();
                 }
-                lastTime = System.currentTimeMillis();
-                onProgressUpdate();
-                now = System.currentTimeMillis();
-                while (now - lastTime < 350) {
-                    Thread.yield();
+                if(GameState.TURN_MACHINE == gameAI.getBoard().getGameState() ||
+                        GameState.TURN_PLAYER == gameAI.getBoard().getGameState()) {
+                    lastTime = System.currentTimeMillis();
+                    onProgressUpdate();
                     now = System.currentTimeMillis();
+                    while (now - lastTime < 350 || GameState.TURN_PLAYER == gameAI.getBoard().getGameState()) {
+                        Thread.yield();
+                        now = System.currentTimeMillis();
+                    }
+                    if (GameState.TURN_MACHINE == gameAI.getBoard().getGameState()) {
+                        onPostExecute();
+                    }
                 }
-                onPostExecute();
             }
             return gameAI;
         }

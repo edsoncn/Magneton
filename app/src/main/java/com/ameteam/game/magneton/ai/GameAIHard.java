@@ -11,7 +11,8 @@ import java.util.Map;
 public class GameAIHard extends GameAI {
 
     private static final float PORC_FOR_DEPTH_1 = 0.85f;
-    private static final float PORC_FOR_DEPTH_2 = 0.56f;
+    private static final float PORC_FOR_DEPTH_2 = 0.62f;
+    private static final float PORC_FOR_DEPTH_3 = 0.56f;
 
     public static final int MAX_DEPTH = 3;
 
@@ -25,13 +26,13 @@ public class GameAIHard extends GameAI {
         Log.i("GameAIHard", " - minimax");
         //System.out.println("GameAIHard: - minimax");
 
-        int depth;
-        if(gameState.getRestPiecesMachine() > rules.getMaxPieces() * PORC_FOR_DEPTH_1){
-            depth = 1;
-        }else if(gameState.getRestPiecesMachine() > rules.getMaxPieces() * PORC_FOR_DEPTH_2){
-            depth = 2;
+        float depth;
+        if(gameState.getRestPiecesMachine() >= 14){
+            depth = 1f;
+        }else if(gameState.getRestPiecesMachine() >=9){
+            depth = 2.0f;
         }else{
-            depth = 3;
+            depth = 3.0f;
         }
 
         Log.i("GameAIHard", " - minimax: depth=" + depth);

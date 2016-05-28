@@ -339,6 +339,10 @@ public class Board extends Character {
         return count;
     }
 
+    public int getGameState(){
+        return ((PlayScene)getScene()).getState();
+    }
+
     public int getPositionXByX(float x){
         return (int) ((x - this.x) / (getWidth() / getDimension()));
     }

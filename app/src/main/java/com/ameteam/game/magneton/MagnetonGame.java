@@ -21,6 +21,7 @@ public class MagnetonGame extends GameThread {
     public static final int LEVEL_EASY = 1;
     public static final int LEVEL_MEDIUM = 2;
     public static final int LEVEL_HARD = 3;
+    public static final int LEVEL_2_PLAYERS = 4;
 
     private PlayScene playScene;
     private SelectScene selectScene;
@@ -38,6 +39,9 @@ public class MagnetonGame extends GameThread {
 
     public synchronized void setStateGame(int state){
         this.stateGame = state;
+        if(state != STATE_GAME_PLAY){
+            playScene.resetState();
+        }
     }
 
     public synchronized void changeState(int state){
