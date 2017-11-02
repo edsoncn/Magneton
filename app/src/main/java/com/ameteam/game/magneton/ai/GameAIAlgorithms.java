@@ -135,8 +135,7 @@ public class GameAIAlgorithms {
                         if (matrix[i][j] == GameState.SQUARE_NOTHING) {
                             int[][] matrixClone = Utils.clone(dimension, matrix);
                             GameState.putPiece(dimension, matrixClone, i, j, turn);
-                            float newDepth = depth == 0.5f ? (Math.random() < 0.000075f ? 1 : 0) : depth - 1;
-                            int heuristicAux = minmaxRecursive(newDepth, dimension, tuple, matrixClone, turn * -1, maxPieces,
+                            int heuristicAux = minmaxRecursive(depth - 1, dimension, tuple, matrixClone, turn * -1, maxPieces,
                                     restPiecesPlayer - (turn == GameState.TURN_PLAYER ? 1 : 0),
                                     restPiecesMachine - (turn == GameState.TURN_MACHINE ? 1 : 0));
                             // if machine state find max heuritic else the min

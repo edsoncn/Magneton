@@ -34,6 +34,10 @@ public class Board extends Character {
     public final float K = 0.000775f; // Gravitational constant
     public final float FF = 0.000175f; // Frictional force
 
+    public static float ST_MAG_TIME_EFECT = 1.25f;
+    private float sumSecElapsed;
+    private boolean endStateMagnetic;
+
     public Board(Scene scene, int dimension) {
         super(scene);
         this.dimension = dimension;
@@ -48,6 +52,10 @@ public class Board extends Character {
 
         lstPieces = new ArrayList<>();
         lastPiece = null;
+
+        sumSecElapsed = 0f;
+        endStateMagnetic = false;
+
     }
 
     public void initStateWaiting(){
@@ -66,7 +74,8 @@ public class Board extends Character {
     }
     public void initStateMagneticEfect(){
         lastPiece.initStateMagneticEfect();
-
+        sumSecElapsed = 0f;
+        endStateMagnetic = false;
         scene.getMagnetonGame().setState(MagnetonGame.STATE_RUNNING);
         state = STATE_MAGNETIC_EFECT;
     }
@@ -144,13 +153,13 @@ public class Board extends Character {
     public void update(float secondsElapsed) {
         switch (state) {
             case STATE_MAGNETIC_EFECT:
-                updateStateMagneticEfect();
+                updateStateMagneticEfect(secondsElapsed);
                 break;
         }
     }
 
-    private void updateStateMagneticEfect(){
-        if (getLstPieces().size() > 1) {
+    private void updateStateMagneticEfect(float secondsElapsed){
+        if (getLstPieces().size() > 1 && !endStateMagnetic) {
             boolean isMovingPieces = false;
             for (Piece p : lstPieces) {
                 if (!p.equals(lastPiece) && p.getM() != 0) {
@@ -192,15 +201,16 @@ public class Board extends Character {
                 }
             }
             if(!isMovingPieces){
-                lastPiece.initStateWait();
-                ((PlayScene)scene).changeTurn();
-                initStateWaiting();
+                endStateMagnetic = true;
             }
         }else{
-            lastPiece.initStateWait();
-            ((PlayScene)scene).changeTurn();
-            initStateWaiting();
+            if(sumSecElapsed >= ST_MAG_TIME_EFECT) {
+                lastPiece.initStateWait();
+                ((PlayScene) scene).changeTurn();
+                initStateWaiting();
+            }
         }
+        sumSecElapsed += secondsElapsed;
     }
 
     public void putPiece(int posX, int posY, int turn){
